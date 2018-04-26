@@ -3,14 +3,9 @@
 		"authors": [
 			"Dream",
 			"Horacewai2",
-			"Waihorace",
-			"Liuxinyu970226"
+			"Waihorace"
 		]
 	},
 	"editaccount": "編輯帳戶",
-	"editaccount-frame-usage": "注釋",
-	"editaccount-submit-account": "管理帳戶",
-	"editaccount-frame-account": "編輯使用者賬號：$1",
-	"editaccount-label-reason": "原因：",
-	"editaccount-submit-button": "儲存"
+	"editaccount-submit-account": "管理帳戶"
 }

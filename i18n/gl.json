@@ -1,17 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Toliño",
-			"Elisardojm",
-			"Banjo"
+			"Toliño"
 		]
 	},
 	"editaccount": "Editar a conta",
-	"editaccount-general-description": "Pechar a túa conta de usuario",
-	"editaccount-user-id": "Identificador de usuario: $1",
-	"editaccount-user-reg-date": "Data de rexistro da conta: $1",
-	"editaccount-return": "Volver",
-	"editaccount-desc": "Permite que os membros cos permisos requiridos [[Special:EditAccount|xestionen a información de contas de usuario]]",
+	"editaccount-desc": "Permite que os membros do persoal xestionen a información das contas de usuario",
 	"editaccount-frame-manage": "Editar unha conta",
 	"editaccount-frame-usage": "Nota",
 	"editaccount-usage": "Os datos de usuario gárdanse na memoria caché por separado para cada wiki. Cando restablece un contrasinal ou correo electrónico, a caché só se anulará para este wiki. Por favor, dirixa ao usuario ata este wiki para que acceda ao sistema co seu novo contrasinal para así evitar problemas de caché.",
@@ -23,14 +17,12 @@
 	"editaccount-label-pass": "Establecer un novo contrasinal",
 	"editaccount-label-realname": "Establecer un novo nome real",
 	"editaccount-label-clearunsub": "Cancelouse a subscrición",
-	"editaccount-label-reason": "Motivo:",
 	"editaccount-submit-email": "Gardar o correo electrónico",
 	"editaccount-submit-pass": "Gardar o contrasinal",
 	"editaccount-submit-realname": "Gardar o nome real",
 	"editaccount-submit-clearunsub": "Desfacer a cancelación da subscrición",
 	"editaccount-submit-cleardisable": "Retirar a marca de desactivado",
 	"editaccount-submit-close": "Pechar a conta",
-	"editaccount-submit-button": "Gardar",
 	"editaccount-usage-close": "Tamén pode desactivar unha conta de usuario codificando o seu contrasinal e eliminando o enderezo de correo electrónico. Teña en conta que se perderá esa información e non se poderá recuperar.",
 	"editaccount-warning-close": "<b>Coidado!</b> Está a piques de desactivar permanentemente a conta do usuario <b>$1</b>. Isto non se pode reverter. Está seguro de que é o que quere facer?",
 	"editaccount-status": "Mensaxe de estado",
@@ -66,6 +58,5 @@
 	"logentry-editaccnt-realnamechange": "$1 cambiou o nome real do usuario $3",
 	"logentry-editaccnt-closeaccnt": "$1 desactivou a conta $3",
 	"edit-account-closed-flag": "ShoutWiki desactivou esta conta globalmente.",
-	"action-editaccount": "editar a información doutros usuarios",
 	"right-editaccount": "Editar as preferencias doutros usuarios"
 }

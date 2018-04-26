@@ -4,12 +4,10 @@
 			"Eleferen",
 			"Kuzura",
 			"Lockal",
-			"Александр Сигачёв",
-			"Wirbel78"
+			"Александр Сигачёв"
 		]
 	},
 	"editaccount": "Изменение учётной записи",
-	"editaccount-return": "Вернуться",
 	"editaccount-desc": "Позволяет управлять учётными записями пользователей",
 	"editaccount-frame-manage": "Изменение учётной записи",
 	"editaccount-frame-usage": "Замечание",
@@ -22,13 +20,12 @@
 	"editaccount-label-pass": "Установка нового пароля",
 	"editaccount-label-realname": "Установка нового настоящего имени",
 	"editaccount-label-clearunsub": "Отписаться",
-	"editaccount-submit-email": "Сохранить и подтвердить адрес эл. почты",
+	"editaccount-submit-email": "Сохранить адрес эл. почты",
 	"editaccount-submit-pass": "Сохранить пароль",
 	"editaccount-submit-realname": "Сохранить настоящее имя",
 	"editaccount-submit-clearunsub": "Снять отказ от подписки",
 	"editaccount-submit-cleardisable": "Очистить отключённый флаг",
 	"editaccount-submit-close": "Закрыть учётную запись",
-	"editaccount-submit-button": "Сохранить",
 	"editaccount-usage-close": "Вы также можете приостановить действие учётной записи, заменив её пароль и удалив адрес электронной почты. Обратите внимание, что эти данные будет невозможно восстановить.",
 	"editaccount-warning-close": "<b>Внимание!</b> Вы собираетесь навсегда отключить учётную запись пользователя <b>$1</b>. Это действие не может быть отменено. Вы уверены, что хотите сделать именно это?",
 	"editaccount-status": "Статусное сообщение",

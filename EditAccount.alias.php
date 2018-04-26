@@ -10,8 +10,7 @@ $specialPageAliases = array();
 
 /** English */
 $specialPageAliases['en'] = array(
-	'EditAccount' => array( 'EditAccount', 'DisableAccount' ),
-	'CloseAccount' => array( 'CloseAccount' ),
+	'EditAccount' => array( 'EditAccount', 'CloseAccount', 'DisableAccount' ),
 );
 
 /** Finnish (Suomi) */
