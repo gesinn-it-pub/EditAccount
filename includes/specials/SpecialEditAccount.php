@@ -262,6 +262,7 @@ class EditAccount extends SpecialPage {
 
 		// HTML output
 		$out->addTemplate( $tmpl );
+		$out->addModules("ext.editAccount.displayuser");
 	}
 
 	/**

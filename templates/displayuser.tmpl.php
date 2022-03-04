@@ -125,15 +125,6 @@ class EditAccountDisplayUserTemplate extends QuickTemplate {
 <?php }
 // end undisable ?>
 </fieldset>
-<script type="text/javascript">
-jQuery( document ).ready( function( $ ) {
-	$( '#EditAccountForm' ).find( 'input[type="text"]' ).focus( function() {
-		if ( $( this ).siblings( 'input[type="radio"]' ).length ) {
-			$( this ).siblings( 'input[type="radio"]' ).prop( 'checked', true );
-		}
-	} );
-} );
-</script>
 <!-- e:<?php echo __FILE__ ?> -->
 <?php
 	}
