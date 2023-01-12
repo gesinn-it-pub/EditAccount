@@ -43,10 +43,6 @@ class EditAccountSelectUserTemplate extends QuickTemplate {
 		<input type="submit" value="<?php echo wfMessage( 'editaccount-submit-account' )->plain(); ?>" />
 		<input type="hidden" name="wpAction" value="displayuser" />
 	</fieldset>
-	<fieldset>
-		<legend><?php echo wfMessage( 'editaccount-frame-usage' )->plain(); ?></legend>
-		<?php echo wfMessage( 'editaccount-usage' )->escaped(); ?>
-	</fieldset>
 </form>
 <!-- e:<?php echo __FILE__ ?> -->
 <?php
