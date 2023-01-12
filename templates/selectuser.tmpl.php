@@ -37,8 +37,6 @@ class EditAccountSelectUserTemplate extends QuickTemplate {
 <?php } ?>
 <form method="post" id="editaccountSelectForm" action="">
 	<fieldset>
-		<legend><?php echo wfMessage( 'editaccount-frame-manage' )->plain() ?></legend>
-		<label for="wpUserName"><?php echo wfMessage( 'editaccount-label-select' )->plain(); ?></label>
 		<input type="text" name="wpUserName" value="<?php echo $user_hsc; ?>" />
 		<input type="submit" value="<?php echo wfMessage( 'editaccount-submit-account' )->plain(); ?>" />
 		<input type="hidden" name="wpAction" value="displayuser" />

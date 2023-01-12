@@ -53,12 +53,13 @@ class EditAccountDisplayUserTemplate extends QuickTemplate {
 <?php } ?>
 <fieldset>
 	<legend><?php echo wfMessage( 'editaccount-frame-account', $user )->escaped() ?></legend>
-	<?php echo $userEncoded ?><br />
-	<?php echo wfMessage( 'editaccount-user-id', $userId )->escaped(); ?><br />
-	<?php echo wfMessage( 'editaccount-user-reg-date', $userReg )->escaped(); ?><br />
-	<?php echo wfMessage( 'editaccount-label-account-status', $userStatus )->escaped(); ?><br />
-	<?php echo wfMessage( 'editaccount-label-email-status', $emailStatus )->escaped(); ?><br />
-	<?php echo $changeEmailRequested; ?><br />
+    <div class="edit-account-user-info">
+        <div class="edit-account-user-info-row"><?php echo wfMessage( 'editaccount-user-id', $userId )->parse(); ?></div>
+        <div class="edit-account-user-info-row"><?php echo wfMessage( 'editaccount-user-reg-date', $userReg )->parse(); ?></div>
+        <div class="edit-account-user-info-row"><?php echo wfMessage( 'editaccount-label-account-status', $userStatus )->parse(); ?></div>
+        <div class="edit-account-user-info-row"><?php echo wfMessage( 'editaccount-label-email-status', $emailStatus )->parse(); ?></div>
+        <div class="edit-account-user-info-row"><?php echo $changeEmailRequested; ?><br />
+    </div>
 	<form method="post" action="" id="EditAccountForm">
 		<div>
 			<input type="radio" id="wpActionSetEmail" name="wpAction" value="setemail" />
