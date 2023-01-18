@@ -47,7 +47,11 @@
 	},
 	"AutoloadClasses": {
 		"CloseAccount": "includes/specials/SpecialCloseAccount.php",
-		"EditAccount": "includes/specials/SpecialEditAccount.php"
+		"EditAccount": "includes/specials/SpecialEditAccount.php",
+		"EditAccountHooks": "includes/Hooks.php"
+	},
+	"Hooks": {
+		"AdminLinks": "EditAccountHooks::addToAdminLinks"
 	},
 	"ResourceModules": {
 		"ext.editAccount": {
