@@ -1,6 +1,6 @@
 {
 	"name": "EditAccount",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"author": [
 		"Łukasz Garczewski",
 		"Jack Phoenix",
@@ -50,6 +50,13 @@
 		"EditAccount": "includes/specials/SpecialEditAccount.php"
 	},
 	"ResourceModules": {
+		"ext.editAccount": {
+			"localBasePath": "modules",
+			"remoteExtPath": "EditAccount/modules",
+			"styles": [
+				"editAccount.css"
+			]
+		},
 		"ext.editAccount.displayuser": {
 			"localBasePath": "modules/js",
 			"remoteExtPath": "EditAccount/modules/js",

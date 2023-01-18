@@ -1,0 +1,34 @@
+.edit-account-card {
+    margin-bottom: 1rem;
+}
+
+.edit-account-card-header {
+    font-size: large;
+    font-weight: bold;
+}
+
+.edit-account-form-fields {
+    display: table;
+    margin-bottom: 1rem;
+}
+
+.edit-account-form-input-text {
+    width: 300px;
+}
+
+.edit-account-form-row {
+    display: table-row;
+}
+
+.edit-account-form-cell {
+    display: table-cell;
+    padding-right: 1.5rem;
+    margin-bottom: 0.3rem;
+}
+
+/* edit account*/
+.edit-account-user-info {
+    margin-bottom: 1rem;
+}
+
+/* close account */

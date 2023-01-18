@@ -18,30 +18,26 @@ class EditAccountSelectUserTemplate extends QuickTemplate {
 		$statusMsg = $this->data['statusMsg'];
 		$statusMsg2 = $this->data['statusMsg2'];
 		$user_hsc = $this->data['user_hsc'];
+
+		if ( $status !== null ) {
+			if ( $status ) {
+				echo Xml::element( 'div', [ 'class' => 'successbox' ], $statusMsg );
+			} else {
+				echo Xml::element( 'div', [ 'class' => 'errorbox' ], $statusMsg );
+			}
+			if ( !empty( $statusMsg2 ) ) {
+				echo Xml::element( 'div', [ 'class' => 'errorbox' ], $statusMsg2 );
+			}
+		}
 ?>
 <!-- s:<?php echo __FILE__ ?> -->
-<?php if ( $status !== null ) { ?>
-<fieldset>
-	<legend><?php echo wfMessage( 'editaccount-status' )->plain(); ?></legend>
-	<?php
-		if ( $status ) {
-			echo Xml::element( 'span', [ 'style' => 'color: darkgreen; font-weight: bold;' ], $statusMsg );
-		} else {
-			echo Xml::element( 'span', [ 'style' => 'color: #fe0000; font-weight: bold;' ], $statusMsg );
-		}
-		if ( !empty( $statusMsg2 ) ) {
-			echo Xml::element( 'span', [ 'style' => 'color: #fe0000; font-weight: bold;' ], $statusMsg2 );
-		}
-	?>
-</fieldset>
-<?php } ?>
-<form method="post" id="editaccountSelectForm" action="">
-	<fieldset>
-		<input type="text" name="wpUserName" value="<?php echo $user_hsc; ?>" />
-		<input type="submit" value="<?php echo wfMessage( 'editaccount-submit-account' )->plain(); ?>" />
-		<input type="hidden" name="wpAction" value="displayuser" />
-	</fieldset>
-</form>
+		<form method="post" id="edit-account-select-form" action="">
+			<fieldset>
+				<input type="text" name="wpUserName" value="<?php echo $user_hsc; ?>" />
+				<input type="submit" value="<?php echo wfMessage( 'editaccount-submit-account' )->plain(); ?>" />
+				<input type="hidden" name="wpAction" value="displayuser" />
+			</fieldset>
+		</form>
 <!-- e:<?php echo __FILE__ ?> -->
 <?php
 	}

@@ -40,7 +40,7 @@
 	"editaccount-success-pass": "Changed password for account $1.",
 	"editaccount-success-realname": "Changed real name for account $1.",
 	"editaccount-success-unsub": "Removed unsubscribe bit for account $1.",
-	"editaccount-success-disable": "Removed disabled bit for account $1.",
+	"editaccount-success-disable": "Account $1 has been reactivated.",
 	"editaccount-success-toggleadopt": "Toggled adoption eligibility status for account $1.",
 	"editaccount-success-close": "Disabled account $1.",
 	"editaccount-error-email": "E-mail was not changed. Try again or contact the Tech Team.",
