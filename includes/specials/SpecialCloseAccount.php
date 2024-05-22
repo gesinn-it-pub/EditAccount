@@ -60,7 +60,7 @@ class CloseAccount extends EditAccount {
 	 *
 	 * @return string Special page description
 	 */
-	public function getDescription() {
+	public function getDescription(): string {
 		return $this->msg( 'editaccount-general-description' )->plain();
 	}
 
@@ -82,7 +82,7 @@ class CloseAccount extends EditAccount {
 	 *
 	 * @param string|null $subPage Parameter (user name) passed to the page or null
 	 */
-	public function execute( $par ) {
+	public function execute( $subPage ) {
 		$out = $this->getOutput();
 		$request = $this->getRequest();
 		$user = $this->getUser();

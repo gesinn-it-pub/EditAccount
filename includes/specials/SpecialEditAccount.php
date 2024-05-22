@@ -550,7 +550,7 @@ class EditAccount extends SpecialPage {
 	 *
 	 * @return bool Always true
 	 */
-	public function clearDisable() {
+	public function clearDisable(): bool {
 		$this->userOptionsManager->setOption( $this->mUser, 'disabled', null );
 		$this->userOptionsManager->setOption( $this->mUser, 'disabled_date', null );
 		$this->userOptionsManager->saveOptions( $this->mUser );

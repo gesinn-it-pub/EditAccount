@@ -71,7 +71,7 @@ class AddEntriesForAllDisabledUsers extends Maintenance {
 						__METHOD__
 					);
 
-					$res = $dbw->update(
+					$dbw->update(
 						'global_preferences',
 						[
 							'gp_property' => 'disabled_date',
