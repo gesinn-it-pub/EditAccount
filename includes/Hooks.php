@@ -1,5 +1,7 @@
 <?php
 
+namespace MediaWiki\Extension\EditAccount;
+
 class EditAccountHooks {
 	/**
 	 * Add a link to 'Special:ApprovedPages' to the page

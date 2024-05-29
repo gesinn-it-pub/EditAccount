@@ -25,13 +25,6 @@
 		"editaccount"
 	],
 	"SpecialPages": {
-		"CloseAccount": {
-			"class": "CloseAccount",
-			"services": [
-				"UserGroupManager",
-				"UserNameUtils"
-			]
-		},
 		"EditAccount": {
 			"class": "EditAccount",
 			"services": [
@@ -40,7 +33,17 @@
 				"UserOptionsManager",
 				"MainWANObjectCache"
 			]
+		},
+		"CloseAccount": {
+			"class": "CloseAccount",
+			"services": [
+				"UserGroupManager",
+				"UserNameUtils"
+			]
 		}
+	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\EditAccount\\": "includes/"
 	},
 	"LogTypes": [
 		"editaccnt"
@@ -60,12 +63,13 @@
 		"EditAccountAliases": "EditAccount.alias.php"
 	},
 	"AutoloadClasses": {
-		"CloseAccount": "includes/specials/SpecialCloseAccount.php",
-		"EditAccount": "includes/specials/SpecialEditAccount.php",
-		"EditAccountHooks": "includes/Hooks.php"
+		"CloseAccount": "includes/Specials/SpecialCloseAccount.php",
+		"EditAccount": "includes/Specials/SpecialEditAccount.php",
+		"EditAccountHooks": "includes/Hooks.php",
+		"User": "includes/User.php"
 	},
 	"Hooks": {
-		"AdminLinks": "EditAccountHooks::addToAdminLinks"
+		"AdminLinks": "MediaWiki\\Extension\\EditAccount\\EditAccountHooks::addToAdminLinks"
 	},
 	"ResourceModules": {
 		"ext.editAccount": {

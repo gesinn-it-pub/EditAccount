@@ -1,4 +1,5 @@
 <?php
+
 /**
  * A special page to allow mortals to close their accounts.
  * Originally used to be a part of the main EditAccount special page, but a
@@ -10,7 +11,6 @@
  * @date 27 February 2015
  * @see https://bugzilla.shoutwiki.com/show_bug.cgi?id=294
  */
-
 use MediaWiki\MediaWikiServices;
 use MediaWiki\User\UserGroupManager;
 use MediaWiki\User\UserNameUtils;

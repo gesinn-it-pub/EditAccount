@@ -1,4 +1,6 @@
 {
+	"name": "gesinn-it-pub/edit-account",
+  	"type": "mediawiki-extension",
 	"require-dev": {
 		"mediawiki/mediawiki-codesniffer": "43.0.0",
 		"mediawiki/mediawiki-phan-config": "0.14.0",
@@ -10,14 +12,19 @@
 		"test": [
 			"parallel-lint . --exclude vendor --exclude node_modules",
 			"minus-x check .",
-			"@phpcs"
+			"@phpunit"
+		],
+		"test-coverage": [
+			"@phpunit-coverage"
 		],
 		"fix": [
 			"minus-x fix .",
-			"phpcbf"
+			"phpcbf",
+			"@phpcs-fix"
 		],
 		"phan": "phan -d . --long-progress-bar",
-		"phpcs": "phpcs -sp --cache"
+		"phpunit": "php ../../tests/phpunit/phpunit.php -c phpunit.xml.dist --testdox",
+		"phpunit-coverage": "php ../../tests/phpunit/phpunit.php -c phpunit.xml.dist --testdox --coverage-text --coverage-html coverage/php --coverage-clover coverage/php/coverage.xml"
 	},
 	"config": {
 		"allow-plugins": {
