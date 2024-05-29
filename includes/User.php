@@ -50,7 +50,7 @@ class User {
 	 * @param UserAccount $user
 	 * @return bool True on success, false on failure (i.e. if we were given an invalid email address)
 	 */
-	public function setEmail( string $email, string $changeReason = '', UserAccount $mUser, UserAccount $mTempUser, UserManager $userOptionsManager, UserAccount $user ): bool {
+	public function setEmail( string $email, UserAccount $mUser, UserAccount $mTempUser, UserManager $userOptionsManager, UserAccount $user, string $changeReason = '' ): bool {
 
 			if ( $mTempUser->mName || $mTempUser->mId ) {
 				if ( $email == '' ) {
@@ -100,7 +100,7 @@ class User {
 	 * @param UserAccount $user
 	 * @return bool True on success, false on failure
 	 */
-	public function setPassword( $pass, string $changeReason = '', UserAccount $mUser, UserAccount $mTempUser, PassFactory $passFactory, UserAccount $user ): bool {
+	public function setPassword( $pass, UserAccount $mUser, UserAccount $mTempUser, PassFactory $passFactory, UserAccount $user, string $changeReason = '' ): bool {
 		if ( $this->setPasswordForUser( $mUser, $pass, $passFactory ) ) {
 			// Save the new settings
 			if ( $mTempUser->mName || $mTempUser->mId ) {
@@ -172,7 +172,7 @@ class User {
 	 * @param UserAccount $user
 	 * @return bool True on success, false on failure
 	 */
-	public function setRealName( $realName, string $changeReason = '', UserAccount $mUser, UserAccount $user ): bool {
+	public function setRealName( $realName, UserAccount $mUser, UserAccount $user, string $changeReason = '' ): bool {
 		$mUser->setRealName( $realName );
 		$mUser->saveSettings();
 
@@ -205,7 +205,7 @@ class User {
 	 * @param Edit $editAccount
 	 * @return bool True on success, false on failure
 	 */
-	public function closeAccount( string $changeReason = '', UserAccount $mUser, UserAccount $user, PassFactory $passFactory, UserManager $userOptionsManager, Edit $editAccount ): bool {
+	public function closeAccount( UserAccount $mUser, UserAccount $user, PassFactory $passFactory, UserManager $userOptionsManager, Edit $editAccount, string $changeReason = '' ): bool {
 		// Set flag for Special:Contributions
 		// NOTE: requires FlagClosedAccounts.php to be included separately
 		if ( defined( 'CLOSED_ACCOUNT_FLAG' ) ) {

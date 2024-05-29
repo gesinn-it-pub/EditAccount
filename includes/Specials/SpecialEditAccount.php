@@ -181,7 +181,7 @@ class EditAccount extends SpecialPage {
 			case 'setemail':
 				$newEmail = $request->getVal( 'wpNewEmail' );
 				if ( Sanitizer::validateEmail( $newEmail ) || $newEmail == '' ) { 
-					$isEmailSet = $userToEdit->setEmail( $newEmail, $changeReason, $mUser, $tmpUser, $this->userOptionsManager, $loggedUser );
+					$isEmailSet = $userToEdit->setEmail( $newEmail, $mUser, $tmpUser, $this->userOptionsManager, $loggedUser, $changeReason );
 					if ( $mUser->getEmail() == $newEmail ) {
 						if ( $isEmailSet !== false ) {
 							if ( $newEmail == '' ) {
@@ -204,7 +204,7 @@ class EditAccount extends SpecialPage {
 				break;
 			case 'setpass':
 				$newPass = $request->getVal( 'wpNewPass' );
-				$isPassSet = $userToEdit->setPassword( $newPass, $changeReason, $mUser, $tmpUser, $this->passwordFactory, $loggedUser );
+				$isPassSet = $userToEdit->setPassword( $newPass, $mUser, $tmpUser, $this->passwordFactory, $loggedUser, $changeReason );
 				if ( $isPassSet ) {
 					$this->mStatusMsg = $this->msg( 'editaccount-success-pass', $mUser->mName )->text();
 					$this->mStatus = $this->mStatusMsg;
@@ -216,7 +216,7 @@ class EditAccount extends SpecialPage {
 				break;
 			case 'setrealname':
 				$newRealName = $request->getVal( 'wpNewRealName' );
-				$isRealNameSet = $userToEdit->setRealName( $newRealName, $changeReason, $mUser, $loggedUser );
+				$isRealNameSet = $userToEdit->setRealName( $newRealName, $mUser, $loggedUser, $changeReason );
 				if ( $isRealNameSet ) {
 					$this->mStatusMsg = $this->msg( 'editaccount-success-realname', $mUser->mName )->text();
 					$this->mStatus = $this->mStatusMsg;
@@ -236,7 +236,7 @@ class EditAccount extends SpecialPage {
 				}
 				break;
 			case 'closeaccountconfirm':
-				$closeAccount = $userToEdit->closeAccount( $changeReason, $mUser, $loggedUser, $this->passwordFactory, $this->userOptionsManager, $this );
+				$closeAccount = $userToEdit->closeAccount( $mUser, $loggedUser, $this->passwordFactory, $this->userOptionsManager, $this, $changeReason );
 				if ( $closeAccount ) {
 					$checkMasterClassAvatar = $this->checkMasterClass();
 					if ( $checkMasterClassAvatar ) {
