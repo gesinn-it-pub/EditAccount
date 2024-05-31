@@ -69,7 +69,7 @@
 		"User": "includes/User.php"
 	},
 	"Hooks": {
-		"AdminLinks": "MediaWiki\\Extension\\EditAccount\\EditAccountHooks::addToAdminLinks"
+		"AdminLinks": "EditAccountHooks::addToAdminLinks"
 	},
 	"ResourceModules": {
 		"ext.editAccount": {
