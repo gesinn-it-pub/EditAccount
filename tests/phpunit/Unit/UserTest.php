@@ -13,8 +13,10 @@ use PHPUnit\Framework\TestCase;
 use User as UserAccount;
 use MediaWiki\User\UserOptionsManager as UserManager;
 use PasswordFactory as PassFactory;
+use MediaWiki\User\UserNameUtils as UserNameUtils;
 use ManualLogEntry as LogEntry;
 use MediaWiki\MediaWikiServices as WikiService;
+use EditAccount as Edit;
 
 /**
  * @group User
@@ -27,7 +29,12 @@ class UserTest extends TestCase {
     private UserAccount $user;
     private UserManager $userManager;
     private PassFactory $passFactory;
+    private UserNameUtils $userNameUtils;
+    private User $userToEdit;
+    private Edit $editAccount;
     private $changeReason;
+    private $checkFunction;
+    private $password;
 
     protected function setUp() : void {
 		parent::setUp();
@@ -46,19 +53,33 @@ class UserTest extends TestCase {
             ->disallowMockingUnknownTypes()
             ->getMock();  
 
-        $this->changeReason = '';   
+        $this->userNameUtils = $this->getMockBuilder(UserNameUtils::class)
+            ->disableOriginalConstructor()
+            ->disableOriginalClone()
+            ->disableArgumentCloning()
+            ->disallowMockingUnknownTypes()
+            ->getMock();  
+
+        $this->changeReason = '';  
+        $this->password = 'test#0309!';
         
         $idUser = 1;
         $this->user = UserAccount::newFromId( $idUser );
 		$id_mUser = 2;
         $this->mUser = UserAccount::newFromId( $id_mUser );
+
+        $this->passFactory = new PassFactory();
+        $this->userToEdit = new User($this->mUser, $this->mTempUser, $this->user);
 	}
 
     protected function tearDown() : void {
         unset($this->userManager);
+        unset($this->userNameUtils);
+        unset($this->passFactory);
         unset($this->mTempUser);
         unset($this->user);
         unset($this->mUser);
+        unset($this->userToEdit);
         parent::tearDown();
     }
 
@@ -69,60 +90,16 @@ class UserTest extends TestCase {
         $this->user->setName($name);
         $this->mUser->setName($name);
         $this->mUser->setEmail($oldEmail);
-        
-        if ( $this->mTempUser->mName || $this->mTempUser->mId ) {
-            if ( $newEmail == '' ) {
-                return false;
-            } else {
-                $this->mTempUser->setEmail( $newEmail );
-                $this->mUser = $this->mTempUser->activateUser( $this->mUser );
 
-                // reset temp user after activating the user
-                $this->mTempUser = null;
-            }
-        } else {
-            $this->mUser->setEmail( $newEmail );
-            if ( $newEmail != '' ) {
-                $this->mUser->confirmEmail();
-                $this->userManager->setOption( $this->mUser, 'new_email', null );
-            } else {
-                $this->mUser->invalidateEmail();
-            }
-            $this->mUser->saveSettings();
-        }
-        
-        if ( $this->mUser->getEmail() == $newEmail ) {
-            // Log the change
-            $logEntry = new LogEntry( 'editaccnt', 'mailchange' );
-            $logEntry->setPerformer( $this->user );
-            $logEntry->setTarget( $this->mUser->getUserPage() );
-            // JP 13 April 2013: not sure if this is the correct one, CHECKME
-            $logEntry->setComment( $this->changeReason );
-            $logEntry->insert();
-
-            $this->assertSame($newEmail, $this->mUser->getEmail());
-        }
+        $this->checkFunction = $this->userToEdit->setEmail( $newEmail, $this->mUser, $this->mTempUser, $this->userManager, $this->user, $this->changeReason );
+        $this->assertTrue($this->checkFunction, 'Function setEmail() returns false, check everything once again!');
     }   
 
     public function testSetRealName() {
         $realName = 'Test Purpose';
-        
-        $this->mUser->setRealName( $realName );
-		$this->mUser->saveSettings();
 
-		// Was the change saved successfully? The setRealName function doesn't
-		// return a boolean value...
-		if ( $this->mUser->getRealName() == $realName ) {
-			// Log what was done
-			$logEntry = new LogEntry( 'editaccnt', 'realnamechange' );
-			$logEntry->setPerformer( $this->user );
-			$logEntry->setTarget( $this->mUser->getUserPage() );
-			// JP 13 April 2013: not sure if this is the correct one, CHECKME
-			$logEntry->setComment( $this->changeReason );
-			$logEntry->insert();
-		}
-
-        $this->assertSame($realName, $this->mUser->getRealName());
+        $this->checkFunction = $this->userToEdit->setRealName( $realName, $this->mUser, $this->user, $this->changeReason );
+        $this->assertTrue($this->checkFunction, 'Function setRealName() returns false, check everything once again!');
     }
 
     public function testValidateMail() {
@@ -134,22 +111,41 @@ class UserTest extends TestCase {
     }
 
     public function testClearUnsubscribe() {
-        $this->userManager->setOption( $this->mUser, 'unsubscribed', null );
-		$this->userManager->saveOptions( $this->mUser );
-        $option = $this->mUser->getOption('unsubscribed');
 
-        $this->assertNull($option, 'Value is not NULL');
+        $this->checkFunction = $this->userToEdit->clearUnsubscribe( $this->userManager, $this->mUser );
+        $this->assertTrue($this->checkFunction, 'Function clearUnsubscribe() returns false, check everything once again!');
     }
 
     public function testClearDisable() {
-        $this->userManager->setOption( $this->mUser, 'disabled', null );
-		$this->userManager->setOption( $this->mUser, 'disabled_date', null );
-		$this->userManager->saveOptions( $this->mUser );
-        $option = $this->mUser->getOption('disabled');
-        $optionDate = $this->mUser->getOption('disabled_date');
 
-        $this->assertNull($option, 'Value is not NULL');
-        $this->assertNull($optionDate, 'Date is not NULL');
+        $this->checkFunction = $this->userToEdit->clearDisable( $this->userManager, $this->mUser );
+        $this->assertTrue($this->checkFunction, 'Function clearDisable() returns false, check everything once again!');
+    }
+
+    public function testCloseAccount() {
+        $this->editAccount = new Edit($this->passFactory, $this->userNameUtils, $this->userManager);
+
+        $this->checkFunction = $this->userToEdit->closeAccount( $this->mUser, $this->user,  $this->passFactory, $this->userManager, $this->editAccount, $this->changeReason );
+        $this->assertTrue($this->checkFunction, 'Function closeAccount() returns false, check everything once again!');
+    }
+
+    public function testSetPasswordForUser() {
+
+        $this->checkFunction = $this->userToEdit->setPasswordForUser( $this->mUser, $this->password,  $this->passFactory );
+        $this->assertTrue($this->checkFunction, 'Function setPasswordForUser() returns false, check everything once again!');
+    }
+
+    public function testSetPassword() {
+
+        $this->checkFunction = $this->userToEdit->setPassword( $this->password, $this->mUser, $this->mTempUser, $this->passFactory, $this->user, $this->changeReason );
+        $this->assertTrue($this->checkFunction, 'Function setPassword() returns false, check everything once again!');
+
+    }
+
+    public function testToggleAdopterStatus() {
+
+        $this->checkFunction = $this->userToEdit->toggleAdopterStatus( $this->userManager, $this->mUser );
+        $this->assertTrue($this->checkFunction, 'Function toggleAdopterStatus() returns false, check everything once again!');
     }
 
 }
