@@ -38,7 +38,9 @@
 			"class": "CloseAccount",
 			"services": [
 				"UserGroupManager",
-				"UserNameUtils"
+				"UserNameUtils",
+				"UserOptionsManager",
+				"PasswordFactory"
 			]
 		}
 	},
