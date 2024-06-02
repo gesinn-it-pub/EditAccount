@@ -14,9 +14,11 @@ use User as UserAccount;
 use MediaWiki\User\UserOptionsManager as UserManager;
 use PasswordFactory as PassFactory;
 use MediaWiki\User\UserNameUtils as UserNameUtils;
+use MediaWiki\User\UserGroupManager;
 use ManualLogEntry as LogEntry;
 use MediaWiki\MediaWikiServices as WikiService;
 use EditAccount as Edit;
+use CloseAccount as Close;
 
 /**
  * @group User
@@ -29,9 +31,11 @@ class UserTest extends TestCase {
     private UserAccount $user;
     private UserManager $userManager;
     private PassFactory $passFactory;
+    private UserGroupManager $userGroupManager;
     private UserNameUtils $userNameUtils;
     private User $userToEdit;
     private Edit $editAccount;
+    private Close $closeAccount;
     private $changeReason;
     private $checkFunction;
     private $password;
@@ -60,6 +64,13 @@ class UserTest extends TestCase {
             ->disallowMockingUnknownTypes()
             ->getMock();  
 
+        $this->userGroupManager = $this->getMockBuilder(UserGroupManager::class)
+            ->disableOriginalConstructor()
+            ->disableOriginalClone()
+            ->disableArgumentCloning()
+            ->disallowMockingUnknownTypes()
+            ->getMock();  
+
         $this->changeReason = '';  
         $this->password = 'test#0309!';
         
@@ -73,6 +84,7 @@ class UserTest extends TestCase {
 	}
 
     protected function tearDown() : void {
+        unset($this->userGroupManager);
         unset($this->userManager);
         unset($this->userNameUtils);
         unset($this->passFactory);
@@ -83,6 +95,7 @@ class UserTest extends TestCase {
         parent::tearDown();
     }
 
+    //phpunit tests for EditAccount feature (SpecialEditAccount.php)
     public function testSetEmail() {
         $newEmail = 'testing@gmail.com';
         $oldEmail = 'test@gmail.com';
@@ -148,4 +161,11 @@ class UserTest extends TestCase {
         $this->assertTrue($this->checkFunction, 'Function toggleAdopterStatus() returns false, check everything once again!');
     }
 
+    //phpunit tests for CloseAccount feature (SpecialCloseAccount.php)
+    public function testCloseUserAccount() {
+        $this->closeAccount = new Close($this->userGroupManager, $this->userNameUtils, $this->userManager, $this->passFactory);
+        
+        $this->checkFunction = $this->userToEdit->closeUserAccount( $this->mUser, $this->passFactory, $this->userManager, $this->closeAccount, $this->changeReason );
+        $this->assertTrue($this->checkFunction, 'Function closeUserAccount() returns false, check everything once again!');
+    }
 }

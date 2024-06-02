@@ -163,9 +163,9 @@ class EditAccount extends SpecialPage {
 					$userToEdit = new UserToEdit($this->mUser, $this->mTempUser , $user);
 				}
 
-					$mUser = $userToEdit->getUserToEdit();
-					$tmpUser = $userToEdit->getTempUser();
-					$loggedUser = $userToEdit->getLoggedUser();
+				$mUser = $userToEdit->getUserToEdit();
+				$tmpUser = $userToEdit->getTempUser();
+				$loggedUser = $userToEdit->getLoggedUser();
 			}
 		}
 
@@ -238,7 +238,7 @@ class EditAccount extends SpecialPage {
 			case 'closeaccountconfirm':
 				$closeAccount = $userToEdit->closeAccount( $mUser, $loggedUser, $this->passwordFactory, $this->userOptionsManager, $this, $changeReason );
 				if ( $closeAccount ) {
-					$checkMasterClassAvatar = $this->checkMasterClass();
+					$checkMasterClassAvatar = $userToEdit->checkMasterClass( $mUser );
 					if ( $checkMasterClassAvatar ) {
 						$this->mStatusMsg2 = $this->msg( 'editaccount-remove-avatar-fail' )->plain();
 						$this->mStatus = $this->mStatusMsg2;
@@ -364,21 +364,6 @@ class EditAccount extends SpecialPage {
 		$out->addTemplate( $tmpl );
 		$out->addModules("ext.editAccount");
 		$out->addModules("ext.editAccount.displayuser");
-	}
-
-	public function checkMasterClass() {
-		if ( class_exists( 'Masthead' ) ) {
-			// Wikia's avatar extension
-			$avatar = Masthead::newFromUser( $this->mUser );
-			if ( !$avatar->isDefault() ) {
-				if ( !$avatar->removeFile( false ) ) {
-					// don't quit here, since the avatar is a non-critical part
-					// of closing, but flag for later
-					
-					return true;
-				}
-			}
-		}
 	}
 
 	/**

@@ -8,6 +8,7 @@ use PasswordFactory as PassFactory;
 use ManualLogEntry as LogEntry;
 use MediaWiki\MediaWikiServices as WikiService;
 use EditAccount as Edit;
+use CloseAccount as Close;
 
 class User {
 
@@ -38,6 +39,8 @@ class User {
 	public function getLoggedUser() {
 		return $this->user;
 	}
+
+	//methods for EditAccount feature
 
     /**
 	 * Set a user's e-mail
@@ -395,4 +398,99 @@ class User {
 		return md5( mt_rand( 0, 0x7fffffff ) . $salt );
 	}
 
+	//methods for CloseAccount feature 
+
+	/**
+	 * Scrambles the user's password, sets an empty e-mail and marks the
+	 * account as disabled; 
+	 * Activated by clicking on Closes the user account option on page Special Pages
+	 * 
+	 * @param string $changeReason Reason for change
+	 * @return bool True on success, false on failure
+	 */
+	public function closeUserAccount( UserAccount $mUser, PassFactory $passFactory, UserManager $userOptionsManager, Close $closeAccount, string $changeReason = '' ): bool {
+		// Set flag for Special:Contributions
+		// NOTE: requires FlagClosedAccounts.php to be included separately
+		if ( defined( 'CLOSED_ACCOUNT_FLAG' ) ) {
+			// @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+			$mUser->setRealName( CLOSED_ACCOUNT_FLAG );
+		} else {
+			// magic value not found, so let's at least blank it
+			$mUser->setRealName( '' );
+		}
+
+		if ( class_exists( 'Masthead' ) ) {
+			// Wikia's avatar extension
+			$avatar = Masthead::newFromUser( $mUser );
+			if ( !$avatar->isDefault() ) {
+				if ( !$avatar->removeFile( false ) ) {
+					// don't quit here, since the avatar is a non-critical part
+					// of closing, but flag for later
+					$this->mStatusMsg2 = $this->msg( 'editaccount-remove-avatar-fail' )->plain();
+				}
+			}
+		}
+
+		// Remove e-mail address and password
+		$mUser->setEmail( '' );
+		$newPass = $this->generateRandomScrambledPassword();
+		$this->setPasswordForUser( $mUser, $newPass, $passFactory );
+
+		// Save the new settings
+		$mUser->saveSettings();
+
+		$id = $mUser->getId();
+
+		// Reload user
+		$mUser = WikiService::getInstance()->getUserFactory()->newFromId( $id );
+
+		if ( $this->mUser->getEmail() == '' ) {
+			// ShoutWiki patch begin
+			$this->setDisabled();
+			// ShoutWiki patch end
+			// Mark as disabled in a more real way, that doesn't depend on the real_name text
+			$userOptionsManager->setOption( $mUser, 'disabled', 1 );
+			$userOptionsManager->setOption( $mUser, 'disabled_date', wfTimestamp( TS_DB ) );
+			// BugId:18085 - setting a new token causes the user to be logged out.
+			$mUser->setToken( md5( microtime() . mt_rand( 0, 0x7fffffff ) ) );
+
+			// BugID:95369 This forces saveSettings() to commit the transaction
+			// FIXME: this is a total hack, we should add a commit=true flag to saveSettings
+			$closeAccount->getRequest()->setVal( 'action', 'ajax' );
+
+			// Need to save these additional changes
+			$mUser->saveSettings();
+
+			// Log what was done
+			$logEntry = new LogEntry( 'editaccnt', 'closeaccnt' );
+			$logEntry->setPerformer( $mUser );
+			$logEntry->setTarget( $mUser->getUserPage() );
+			// JP 13 April 2013: not sure if this is the correct one, CHECKME
+			$logEntry->setComment( $changeReason );
+			$logEntry->insert();
+
+			// All clear!
+			//$this->mStatusMsg = $this->msg( 'editaccount-success-close', $mUser->mName )->text();
+			return true;
+		} else {
+			// There were errors...inform the user about those
+			//$this->mStatusMsg = $this->msg( 'editaccount-error-close', $mUser->mName )->text();
+			return false;
+		}
+	}
+
+	public function checkMasterClass( UserAccount $mUser ) {
+		if ( class_exists( 'Masthead' ) ) {
+			// Wikia's avatar extension
+			$avatar = Masthead::newFromUser( $mUser );
+			if ( !$avatar->isDefault() ) {
+				if ( !$avatar->removeFile( false ) ) {
+					// don't quit here, since the avatar is a non-critical part
+					// of closing, but flag for later
+					
+					return true;
+				}
+			}
+		}
+	}
 }

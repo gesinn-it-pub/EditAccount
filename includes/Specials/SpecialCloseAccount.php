@@ -15,6 +15,7 @@ use MediaWiki\MediaWikiServices;
 use MediaWiki\User\UserGroupManager;
 use MediaWiki\User\UserNameUtils;
 use MediaWiki\User\UserOptionsManager;
+use MediaWiki\Extension\EditAccount\User as UserToDeactivate;
 
 // @note Extends EditAccount so that we don't have to duplicate closeAccount() etc.
 class CloseAccount extends EditAccount {
@@ -23,6 +24,10 @@ class CloseAccount extends EditAccount {
 	 * @var null|User User object for the account that is to be disabled
 	 */
 	public ?User $mUser;
+	/** @var UserToDeactivate|null */
+	public ?UserToDeactivate $UserToDeactivate = null;
+	/** @var User|null */
+	public ?User $mTempUser = null;
 
 	/** @var UserOptionsManager */
 	private UserOptionsManager $userOptionsManager;
@@ -136,13 +141,33 @@ class CloseAccount extends EditAccount {
 			$this->mUser = MediaWikiServices::getInstance()->getUserFactory()->newFromName( $userName );
 		}
 
+		if ( $this->mTempUser == null ) {
+			$tmpUser = new User();
+			//create an object of User class with reference on mUser who is going to be deactivated
+			$userToDeactivate = new UserToDeactivate($this->mUser, $tmpUser , $user);
+		} else {
+			//create an object of User class with reference on mUser who is going to be deactivated
+			$userToDeactivate = new UserToDeactivate($this->mUser, $this->mTempUser , $user);
+		}
+
+		$mUser = $userToDeactivate->getUserToEdit();
+
 		$changeReason = $request->getVal( 'wpReason' );
 
 		if ( $request->wasPosted() ) {
-			$this->mStatus = $this->closeUserAccount( $changeReason );
-			if ( $this->mStatus ) {
+			$isAccountDeactivated = $userToDeactivate->closeUserAccount( $mUser, $this->passwordFactory, $this->userOptionsManager, $this,  $changeReason );
+			if ( $isAccountDeactivated ) {
+				$checkMasterClassAvatar = $userToDeactivate->checkMasterClass( $mUser );
+					if ( $checkMasterClassAvatar ) {
+						$this->mStatusMsg2 = $this->msg( 'editaccount-remove-avatar-fail' )->plain();
+						$this->mStatus = $this->mStatusMsg2;
+					} 
+				$this->mStatusMsg = $this->msg( 'editaccount-success-close', $mUser->mName )->text();
+				$this->mStatus = $this->mStatusMsg;
 				$color = 'darkgreen';
 			} else {
+				$this->mStatusMsg = $this->msg( 'editaccount-error-close', $mUser->mName )->text();
+				$this->mStatus = $this->mStatusMsg;
 				$color = '#fe0000';
 			}
 
@@ -175,180 +200,5 @@ class CloseAccount extends EditAccount {
 			// @phan-suppress-next-line PhanTypeMismatchArgument
 			$out->addTemplate( $tmpl );
 		}
-	}
-
-	/**
-	 * Scrambles the user's password, sets an empty e-mail and marks the
-	 * account as disabled; 
-	 * Activated by clicking on Closes the user account option on page Special Pages
-	 * 
-	 * @param string $changeReason Reason for change
-	 * @return bool True on success, false on failure
-	 */
-	public function closeUserAccount( string $changeReason = '' ): bool {
-		// Set flag for Special:Contributions
-		// NOTE: requires FlagClosedAccounts.php to be included separately
-		if ( defined( 'CLOSED_ACCOUNT_FLAG' ) ) {
-			// @phan-suppress-next-line PhanTypeMismatchArgumentNullable
-			$this->mUser->setRealName( CLOSED_ACCOUNT_FLAG );
-		} else {
-			// magic value not found, so let's at least blank it
-			$this->mUser->setRealName( '' );
-		}
-
-		if ( class_exists( 'Masthead' ) ) {
-			// Wikia's avatar extension
-			$avatar = Masthead::newFromUser( $this->mUser );
-			if ( !$avatar->isDefault() ) {
-				if ( !$avatar->removeFile( false ) ) {
-					// don't quit here, since the avatar is a non-critical part
-					// of closing, but flag for later
-					$this->mStatusMsg2 = $this->msg( 'editaccount-remove-avatar-fail' )->plain();
-				}
-			}
-		}
-
-		// Remove e-mail address and password
-		$this->mUser->setEmail( '' );
-		$newPass = $this->generateRandomScrambledPassword();
-		$this->setPasswordForDeactivatedUser( $this->mUser, $newPass );
-
-		// Save the new settings
-		$this->mUser->saveSettings();
-
-		$id = $this->mUser->getId();
-
-		// Reload user
-		$this->mUser = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $id );
-
-		if ( $this->mUser->getEmail() == '' ) {
-			// ShoutWiki patch begin
-			$this->setDisabled();
-			// ShoutWiki patch end
-			// Mark as disabled in a more real way, that doesn't depend on the real_name text
-			$this->userOptionsManager->setOption( $this->mUser, 'disabled', 1 );
-			$this->userOptionsManager->setOption( $this->mUser, 'disabled_date', wfTimestamp( TS_DB ) );
-			// BugId:18085 - setting a new token causes the user to be logged out.
-			$this->mUser->setToken( md5( microtime() . mt_rand( 0, 0x7fffffff ) ) );
-
-			// BugID:95369 This forces saveSettings() to commit the transaction
-			// FIXME: this is a total hack, we should add a commit=true flag to saveSettings
-			$this->getRequest()->setVal( 'action', 'ajax' );
-
-			// Need to save these additional changes
-			$this->mUser->saveSettings();
-
-			// Log what was done
-			$logEntry = new ManualLogEntry( 'editaccnt', 'closeaccnt' );
-			$logEntry->setPerformer( $this->getUser() );
-			$logEntry->setTarget( $this->mUser->getUserPage() );
-			// JP 13 April 2013: not sure if this is the correct one, CHECKME
-			$logEntry->setComment( $changeReason );
-			$logEntry->insert();
-
-			// All clear!
-			$this->mStatusMsg = $this->msg( 'editaccount-success-close', $this->mUser->mName )->text();
-			return true;
-		} else {
-			// There were errors...inform the user about those
-			$this->mStatusMsg = $this->msg( 'editaccount-error-close', $this->mUser->mName )->text();
-			return false;
-		}
-	}
-
-	/**
-	 * Set the password on a user
-	 *
-	 * @param User $user
-	 * @param string $password
-	 * @return bool
-	 */
-	public function setPasswordForDeactivatedUser( User $mUser, string $password ): bool {
-		if ( !$mUser->getId() ) {
-			return false;
-			// throw new MWException( "Passed User has not been added to the database yet!" );
-		}
-
-		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getMaintenanceConnectionRef( DB_PRIMARY );
-		$row = $dbw->selectRow(
-			'user',
-			'user_id',
-			[ 'user_id' => $mUser->getId() ],
-			__METHOD__
-		);
-		if ( !$row ) {
-			return false;
-			// throw new MWException( "Passed User has an ID but is not in the database?" );
-		}
-
-		$passwordHash = $this->passwordFactory->newFromPlaintext( $password );
-		$dbw->update(
-			'user',
-			[ 'user_password' => $passwordHash->toString() ],
-			[ 'user_id' => $mUser->getId() ],
-			__METHOD__
-		);
-
-		return true;
-	}
-
-	/**
-	 * Returns a random password which conforms to our password requirements
-	 * and is not easily guessable.
-	 *
-	 * @return string
-	 */
-	public function generateRandomScrambledPassword(): string {
-		// Password requirements need a capital letter, a digit, and a lowercase letter.
-		// wfGenerateToken() returns a 32 char hex string, which will almost
-		// always satisfy the digit/letter but not always.
-		// This suffix shouldn't reduce the entropy of the intentionally
-		// scrambled password.
-		$REQUIRED_CHARS = 'A1a';
-		return ( self::generateToken() . $REQUIRED_CHARS );
-	}
-
-	/**
-	* Copypasta from pre-1.23 /includes/GlobalFunctions.php
-	* @see https://phabricator.wikimedia.org/rMW118567a4ba0ded669f43a58713733cab915afe39
-	*
-	* @param string $salt
-	* @return string
-	*/
-   public static function generateToken( string $salt = '' ): string {
-	   $salt = serialize( $salt );
-	   return md5( mt_rand( 0, 0x7fffffff ) . $salt );
-   }
-
-   /**
-	 * Marks the account as disabled, the ShoutWiki way.
-	 */
-	public function setDisabled() {
-		if ( !class_exists( 'GlobalPreferences' ) ) {
-			error_log( 'Cannot use the GlobalPreferences class in ' . __METHOD__ );
-			return;
-		}
-		$dbw = GlobalPreferences::getPrefsDB( DB_PRIMARY );
-
-		$dbw->startAtomic( __METHOD__ );
-		$dbw->insert(
-			'global_preferences',
-			[
-				'gp_property' => 'disabled',
-				'gp_value' => 1,
-				'gp_user' => $this->mUser->getId()
-			],
-			__METHOD__
-		);
-		$dbw->insert(
-			'global_preferences',
-			[
-				'gp_property' => 'disabled_date',
-				'gp_value' => wfTimestamp( TS_DB ),
-				'gp_user' => $this->mUser->getId()
-			],
-			__METHOD__
-		);
-		$dbw->endAtomic( __METHOD__ );
 	}
 }
