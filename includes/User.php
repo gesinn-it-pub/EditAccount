@@ -21,86 +21,99 @@ class User {
 	/** @var UserAccount|null */
 	private ?UserAccount $user;
 
- 
-	public function __construct(UserAccount $mUser, UserAccount $mTempUser, UserAccount $user) {
+	public function __construct( UserAccount $mUser, UserAccount $mTempUser, UserAccount $user ) {
 		$this->mUser = $mUser;
 		$this->mTempUser = $mTempUser;
 		$this->user = $user;
 	}
 
+	/**
+	 * Get User who is going to be edited
+	 *
+	 * @return User 
+	 */
 	public function getUserToEdit() {
 		return $this->mUser;
 	}
 
+	/**
+	 * Get temporary user who is going to be assigned as User
+	 *
+	 * @return User 
+	 */
 	public function getTempUser() {
 		return $this->mTempUser;
 	}
 
+	/**
+	 * Get User who is logged in to the system
+	 *
+	 * @return User 
+	 */
 	public function getLoggedUser() {
 		return $this->user;
 	}
 
-	//methods for EditAccount feature
+	// methods for EditAccount feature
 
     /**
 	 * Set a user's e-mail
-	 
+	 *
 	 * @param string $email E-mail address to set to the user
-	 * @param string $changeReason Reason for change
 	 * @param UserAccount $mUser 
 	 * @param UserAccount $mTempUser
 	 * @param UserManager $userOptionsManager
 	 * @param UserAccount $user
+	 * @param string $changeReason Reason for change
 	 * @return bool True on success, false on failure (i.e. if we were given an invalid email address)
 	 */
 	public function setEmail( string $email, UserAccount $mUser, UserAccount $mTempUser, UserManager $userOptionsManager, UserAccount $user, string $changeReason = '' ): bool {
-
-			if ( $mTempUser->mName || $mTempUser->mId ) {
-				if ( $email == '' ) {
-					return false;
-				} else {
-					$mTempUser->setEmail( $email );
-					$mUser = $mTempUser->activateUser( $mUser );
-
-					// reset temp user after activating the user
-					$mTempUser = null;
-				}
-			} else {
-				$mUser->setEmail( $email );
-				if ( $email != '' ) {
-					$mUser->confirmEmail();
-					$userOptionsManager->setOption( $mUser, 'new_email', null );
-				} else {
-					$mUser->invalidateEmail();
-				}
-				$mUser->saveSettings();
-			}
-
-			// Check if everything went through OK, just in case
-			if ( $mUser->getEmail() == $email ) {
-				// Log the change
-				$logEntry = new LogEntry( 'editaccnt', 'mailchange' );
-				$logEntry->setPerformer( $user );
-				$logEntry->setTarget( $mUser->getUserPage() );
-				// JP 13 April 2013: not sure if this is the correct one, CHECKME
-				$logEntry->setComment( $changeReason );
-				$logEntry->insert();
-
-				return true;
-			} else {
+		if ( $mTempUser->mName || $mTempUser->mId ) {
+			if ( $email == '' ) {
 				return false;
+			} else {
+				$mTempUser->setEmail( $email );
+				$mUser = $mTempUser->activateUser( $mUser );
+
+				// reset temp user after activating the user
+				$mTempUser = null;
 			}
+		} else {
+				$mUser->setEmail( $email );
+			if ( $email != '' ) {
+				$mUser->confirmEmail();
+				$userOptionsManager->setOption( $mUser, 'new_email', null );
+			} else {
+				$mUser->invalidateEmail();
+			}
+				$mUser->saveSettings();
+		}
+
+		// Check if everything went through OK, just in case
+		if ( $mUser->getEmail() == $email ) {
+			// Log the change
+			$logEntry = new LogEntry( 'editaccnt', 'mailchange' );
+			$logEntry->setPerformer( $user );
+			$logEntry->setTarget( $mUser->getUserPage() );
+			// JP 13 April 2013: not sure if this is the correct one, CHECKME
+			$logEntry->setComment( $changeReason );
+			$logEntry->insert();
+
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
 	 * Set a user's password.
 	 *
 	 * @param mixed $pass Password to set to the user
-	 * @param string $changeReason Reason for change
 	 * @param UserAccount $mUser
 	 * @param UserAccount $mTempUser
 	 * @param PassFactory $passFactory
 	 * @param UserAccount $user
+	 * @param string $changeReason Reason for change
 	 * @return bool True on success, false on failure
 	 */
 	public function setPassword( $pass, UserAccount $mUser, UserAccount $mTempUser, PassFactory $passFactory, UserAccount $user, string $changeReason = '' ): bool {
@@ -129,7 +142,7 @@ class User {
 		}
 	}
 
-		/**
+	/**
 	 * Set the password on a user
 	 *
 	 * @param UserAccount $mUser
@@ -166,13 +179,13 @@ class User {
 		return true;
 	}
 
-		/**
+	/**
 	 * Set a user's real name.
 	 *
 	 * @param mixed $realName Real name to set to the user
-	 * @param string $changeReason Reason for change
 	 * @param UserAccount $mUser
 	 * @param UserAccount $user
+	 * @param string $changeReason Reason for change
 	 * @return bool True on success, false on failure
 	 */
 	public function setRealName( $realName, UserAccount $mUser, UserAccount $user, string $changeReason = '' ): bool {
@@ -196,16 +209,16 @@ class User {
 		}
 	}
 
-		/**
+	/**
 	 * Scrambles the user's password, sets an empty e-mail and marks the
 	 * account as disabled
 	 *
-	 * @param string $changeReason Reason for change
 	 * @param UserAccount $mUser
 	 * @param UserAccount $user
 	 * @param PassFactory $passFactory
 	 * @param UserManager $userOptionsManager
 	 * @param Edit $editAccount
+	 * @param string $changeReason Reason for change
 	 * @return bool True on success, false on failure
 	 */
 	public function closeAccount( UserAccount $mUser, UserAccount $user, PassFactory $passFactory, UserManager $userOptionsManager, Edit $editAccount, string $changeReason = '' ): bool {
@@ -263,7 +276,7 @@ class User {
 		}
 	}
 
-		/**
+	/**
 	 * Returns a random password which conforms to our password requirements
 	 * and is not easily guessable.
 	 *
@@ -279,7 +292,7 @@ class User {
 		return ( self::generateToken() . $REQUIRED_CHARS );
 	}
 
-		/**
+	/**
 	 * Marks the account as disabled, the ShoutWiki way.
 	 */
 	public function setDisabled() {
@@ -311,7 +324,7 @@ class User {
 		$dbw->endAtomic( __METHOD__ );
 	}
 
-		/**
+	/**
 	 * Clears the magic unsub bit
 	 * @param UserManager $userOptionsManager
 	 * @param UserAccount $mUser
@@ -324,7 +337,7 @@ class User {
 		return true;
 	}
 
-		/**
+	/**
 	 * Clears the magic disabled bit
 	 * @param UserManager $userOptionsManager
 	 * @param UserAccount $mUser
@@ -368,7 +381,7 @@ class User {
 		return true;
 	}
 
-		/**
+	/**
 	 * Set the adoption status (i.e. is the user who is being edited allowed to
 	 * automatically adopt wikis or not).
 	 * @param UserManager $userOptionsManager
@@ -386,7 +399,7 @@ class User {
 		return true;
 	}
 
-		/**
+	/**
 	 * Copypasta from pre-1.23 /includes/GlobalFunctions.php
 	 * @see https://phabricator.wikimedia.org/rMW118567a4ba0ded669f43a58713733cab915afe39
 	 *
@@ -398,13 +411,17 @@ class User {
 		return md5( mt_rand( 0, 0x7fffffff ) . $salt );
 	}
 
-	//methods for CloseAccount feature 
+	// methods for CloseAccount feature 
 
 	/**
 	 * Scrambles the user's password, sets an empty e-mail and marks the
 	 * account as disabled; 
 	 * Activated by clicking on Closes the user account option on page Special Pages
 	 * 
+	 * @param UserAccount $mUser
+	 * @param PassFactory $passFactory
+	 * @param UserManager $userOptionsManager
+	 * @param Close $closeAccount
 	 * @param string $changeReason Reason for change
 	 * @return bool True on success, false on failure
 	 */
@@ -479,6 +496,11 @@ class User {
 		}
 	}
 
+	/**
+	 * Check if Masterhead class exists 
+	 *
+	 * @return bool True on success, false on failure 
+	 */
 	public function checkMasterClass( UserAccount $mUser ) {
 		if ( class_exists( 'Masthead' ) ) {
 			// Wikia's avatar extension

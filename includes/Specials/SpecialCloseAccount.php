@@ -143,11 +143,11 @@ class CloseAccount extends EditAccount {
 
 		if ( $this->mTempUser == null ) {
 			$tmpUser = new User();
-			//create an object of User class with reference on mUser who is going to be deactivated
-			$userToDeactivate = new UserToDeactivate($this->mUser, $tmpUser , $user);
+			// create an object of User class with reference on mUser who is going to be deactivated
+			$userToDeactivate = new UserToDeactivate($this->mUser, $tmpUser, $user);
 		} else {
-			//create an object of User class with reference on mUser who is going to be deactivated
-			$userToDeactivate = new UserToDeactivate($this->mUser, $this->mTempUser , $user);
+			// create an object of User class with reference on mUser who is going to be deactivated
+			$userToDeactivate = new UserToDeactivate($this->mUser, $this->mTempUser, $user);
 		}
 
 		$mUser = $userToDeactivate->getUserToEdit();
@@ -155,13 +155,13 @@ class CloseAccount extends EditAccount {
 		$changeReason = $request->getVal( 'wpReason' );
 
 		if ( $request->wasPosted() ) {
-			$isAccountDeactivated = $userToDeactivate->closeUserAccount( $mUser, $this->passwordFactory, $this->userOptionsManager, $this,  $changeReason );
+			$isAccountDeactivated = $userToDeactivate->closeUserAccount( $mUser, $this->passwordFactory, $this->userOptionsManager, $this, $changeReason );
 			if ( $isAccountDeactivated ) {
 				$checkMasterClassAvatar = $userToDeactivate->checkMasterClass( $mUser );
-					if ( $checkMasterClassAvatar ) {
-						$this->mStatusMsg2 = $this->msg( 'editaccount-remove-avatar-fail' )->plain();
-						$this->mStatus = $this->mStatusMsg2;
-					} 
+				if ( $checkMasterClassAvatar ) {
+					$this->mStatusMsg2 = $this->msg( 'editaccount-remove-avatar-fail' )->plain();
+					$this->mStatus = $this->mStatusMsg2;
+				} 
 				$this->mStatusMsg = $this->msg( 'editaccount-success-close', $mUser->mName )->text();
 				$this->mStatus = $this->mStatusMsg;
 				$color = 'darkgreen';

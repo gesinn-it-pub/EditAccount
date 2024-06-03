@@ -8,17 +8,15 @@
  * @license MIT
  */
 
-use MediaWiki\Extension\EditAccount\User as User;
+use CloseAccount as Close;
+use EditAccount as Edit;
+use PasswordFactory as PassFactory;
 use PHPUnit\Framework\TestCase;
 use User as UserAccount;
+use MediaWiki\Extension\EditAccount\User;
 use MediaWiki\User\UserOptionsManager as UserManager;
-use PasswordFactory as PassFactory;
-use MediaWiki\User\UserNameUtils as UserNameUtils;
+use MediaWiki\User\UserNameUtils;
 use MediaWiki\User\UserGroupManager;
-use ManualLogEntry as LogEntry;
-use MediaWiki\MediaWikiServices as WikiService;
-use EditAccount as Edit;
-use CloseAccount as Close;
 
 /**
  * @group User
@@ -36,11 +34,11 @@ class UserTest extends TestCase {
     private User $userToEdit;
     private Edit $editAccount;
     private Close $closeAccount;
-    private $changeReason;
-    private $checkFunction;
-    private $password;
+    private string $changeReason;
+    private bool $checkFunction;
+    private string $password;
 
-    protected function setUp() : void {
+    protected function setUp(): void {
 		parent::setUp();
 
         $this->userManager = $this->getMockBuilder(UserManager::class)
@@ -48,7 +46,7 @@ class UserTest extends TestCase {
             ->disableOriginalClone()
             ->disableArgumentCloning()
             ->disallowMockingUnknownTypes()
-            ->getMock();     
+            ->getMock();  
             
         $this->mTempUser = $this->getMockBuilder(UserAccount::class)
             ->disableOriginalConstructor()
@@ -83,7 +81,7 @@ class UserTest extends TestCase {
         $this->userToEdit = new User($this->mUser, $this->mTempUser, $this->user);
 	}
 
-    protected function tearDown() : void {
+    protected function tearDown(): void {
         unset($this->userGroupManager);
         unset($this->userManager);
         unset($this->userNameUtils);
@@ -95,7 +93,6 @@ class UserTest extends TestCase {
         parent::tearDown();
     }
 
-    //phpunit tests for EditAccount feature (SpecialEditAccount.php)
     public function testSetEmail() {
         $newEmail = 'testing@gmail.com';
         $oldEmail = 'test@gmail.com';
@@ -124,13 +121,11 @@ class UserTest extends TestCase {
     }
 
     public function testClearUnsubscribe() {
-
         $this->checkFunction = $this->userToEdit->clearUnsubscribe( $this->userManager, $this->mUser );
         $this->assertTrue($this->checkFunction, 'Function clearUnsubscribe() returns false, check everything once again!');
     }
 
     public function testClearDisable() {
-
         $this->checkFunction = $this->userToEdit->clearDisable( $this->userManager, $this->mUser );
         $this->assertTrue($this->checkFunction, 'Function clearDisable() returns false, check everything once again!');
     }
@@ -138,30 +133,25 @@ class UserTest extends TestCase {
     public function testCloseAccount() {
         $this->editAccount = new Edit($this->passFactory, $this->userNameUtils, $this->userManager);
 
-        $this->checkFunction = $this->userToEdit->closeAccount( $this->mUser, $this->user,  $this->passFactory, $this->userManager, $this->editAccount, $this->changeReason );
+        $this->checkFunction = $this->userToEdit->closeAccount( $this->mUser, $this->user, $this->passFactory, $this->userManager, $this->editAccount, $this->changeReason );
         $this->assertTrue($this->checkFunction, 'Function closeAccount() returns false, check everything once again!');
     }
 
     public function testSetPasswordForUser() {
-
-        $this->checkFunction = $this->userToEdit->setPasswordForUser( $this->mUser, $this->password,  $this->passFactory );
+        $this->checkFunction = $this->userToEdit->setPasswordForUser( $this->mUser, $this->password, $this->passFactory );
         $this->assertTrue($this->checkFunction, 'Function setPasswordForUser() returns false, check everything once again!');
     }
 
     public function testSetPassword() {
-
         $this->checkFunction = $this->userToEdit->setPassword( $this->password, $this->mUser, $this->mTempUser, $this->passFactory, $this->user, $this->changeReason );
         $this->assertTrue($this->checkFunction, 'Function setPassword() returns false, check everything once again!');
-
     }
 
     public function testToggleAdopterStatus() {
-
         $this->checkFunction = $this->userToEdit->toggleAdopterStatus( $this->userManager, $this->mUser );
         $this->assertTrue($this->checkFunction, 'Function toggleAdopterStatus() returns false, check everything once again!');
     }
 
-    //phpunit tests for CloseAccount feature (SpecialCloseAccount.php)
     public function testCloseUserAccount() {
         $this->closeAccount = new Close($this->userGroupManager, $this->userNameUtils, $this->userManager, $this->passFactory);
         

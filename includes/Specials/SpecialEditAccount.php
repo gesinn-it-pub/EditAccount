@@ -156,11 +156,11 @@ class EditAccount extends SpecialPage {
 
 				if ( $this->mTempUser == null ) {
 					$tmpUser = new User();
-					//create an object of User class with reference on mUser who is going to be edited
-					$userToEdit = new UserToEdit($this->mUser, $tmpUser , $user);
+					// create an object of User class with reference on mUser who is going to be edited
+					$userToEdit = new UserToEdit($this->mUser, $tmpUser, $user);
 				} else {
-					//create an object of User class with reference on mUser who is going to be edited
-					$userToEdit = new UserToEdit($this->mUser, $this->mTempUser , $user);
+					// create an object of User class with reference on mUser who is going to be edited
+					$userToEdit = new UserToEdit($this->mUser, $this->mTempUser, $user);
 				}
 
 				$mUser = $userToEdit->getUserToEdit();

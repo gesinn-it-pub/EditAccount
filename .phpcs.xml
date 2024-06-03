@@ -9,6 +9,9 @@
 		<exclude name="MediaWiki.WhiteSpace.SpaceyParenthesis.SingleSpaceBeforeCloseParenthesis" />
 		<exclude name="MediaWiki.WhiteSpace.SpaceyParenthesis.SingleSpaceAfterOpenParenthesis" />
 		<exclude name="Generic.Files.LineEndings.InvalidEOLChar" />
+		<exclude name="Squiz.WhiteSpace.SuperfluousWhitespace.EndLine" />
+		<exclude name="MediaWiki.Classes.UnsortedUseStatements.UnsortedUse" />
+
 	</rule>
 	<file>.</file>
 	<arg name="extensions" value="php"/>
