@@ -5,5 +5,5 @@ image:https://codecov.io/gh/gesinn-it-pub/EditAccount/graph/badge.svg?token=4BNT
 
 The EditAccount is a MediaWiki extension that has two main purposes. One is to change the password, real name, or email address of another user. The second is to disable the account of another user.
  
-Documentation
+== Documentation
 For documentation see: https://www.mediawiki.org/wiki/Extension:EditAccount
