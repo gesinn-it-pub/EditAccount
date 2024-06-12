@@ -144,10 +144,10 @@ class CloseAccount extends EditAccount {
 		if ( $this->mTempUser == null ) {
 			$tmpUser = new User();
 			// create an object of User class with reference on mUser who is going to be deactivated
-			$userToDeactivate = new UserToDeactivate($this->mUser, $tmpUser, $user);
+			$userToDeactivate = new UserToDeactivate( $this->mUser, $tmpUser, $user );
 		} else {
 			// create an object of User class with reference on mUser who is going to be deactivated
-			$userToDeactivate = new UserToDeactivate($this->mUser, $this->mTempUser, $user);
+			$userToDeactivate = new UserToDeactivate( $this->mUser, $this->mTempUser, $user );
 		}
 
 		$mUser = $userToDeactivate->getUserToEdit();

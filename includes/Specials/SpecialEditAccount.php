@@ -1,9 +1,9 @@
 <?php
 
+use MediaWiki\Extension\EditAccount\User as UserToEdit;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\User\UserNameUtils;
 use MediaWiki\User\UserOptionsManager;
-use MediaWiki\Extension\EditAccount\User as UserToEdit;
 
 /**
  * Main logic of the EditAccount extension
@@ -157,10 +157,10 @@ class EditAccount extends SpecialPage {
 				if ( $this->mTempUser == null ) {
 					$tmpUser = new User();
 					// create an object of User class with reference on mUser who is going to be edited
-					$userToEdit = new UserToEdit($this->mUser, $tmpUser, $user);
+					$userToEdit = new UserToEdit( $this->mUser, $tmpUser, $user );
 				} else {
 					// create an object of User class with reference on mUser who is going to be edited
-					$userToEdit = new UserToEdit($this->mUser, $this->mTempUser, $user);
+					$userToEdit = new UserToEdit( $this->mUser, $this->mTempUser, $user );
 				}
 
 				$mUser = $userToEdit->getUserToEdit();
@@ -362,8 +362,8 @@ class EditAccount extends SpecialPage {
 
 		// HTML output
 		$out->addTemplate( $tmpl );
-		$out->addModules("ext.editAccount");
-		$out->addModules("ext.editAccount.displayuser");
+		$out->addModules( "ext.editAccount" );
+		$out->addModules( "ext.editAccount.displayuser" );
 	}
 
 	/**
