@@ -175,12 +175,12 @@ class EditAccount extends SpecialPage {
 		}
 
 		$changeReason = $request->getVal( 'wpReason' );
-		
+
 		// What to do, what to show? Hmm...
 		switch ( $action ) {
 			case 'setemail':
 				$newEmail = $request->getVal( 'wpNewEmail' );
-				if ( Sanitizer::validateEmail( $newEmail ) || $newEmail == '' ) { 
+				if ( Sanitizer::validateEmail( $newEmail ) || $newEmail == '' ) {
 					$isEmailSet = $userToEdit->setEmail( $newEmail, $mUser, $tmpUser, $this->userOptionsManager, $loggedUser, $changeReason );
 					if ( $mUser->getEmail() == $newEmail ) {
 						if ( $isEmailSet !== false ) {
@@ -242,7 +242,7 @@ class EditAccount extends SpecialPage {
 					if ( $checkMasterClassAvatar ) {
 						$this->mStatusMsg2 = $this->msg( 'editaccount-remove-avatar-fail' )->plain();
 						$this->mStatus = $this->mStatusMsg2;
-					} 
+					}
 					$this->mStatusMsg = $this->msg( 'editaccount-success-close', $mUser->mName )->text();
 					$this->mStatus = $this->mStatusMsg;
 				} else {

@@ -46,32 +46,32 @@ class UserTest extends TestCase {
             ->disableOriginalClone()
             ->disableArgumentCloning()
             ->disallowMockingUnknownTypes()
-            ->getMock();  
-            
+            ->getMock();
+
         $this->mTempUser = $this->getMockBuilder(UserAccount::class)
             ->disableOriginalConstructor()
             ->disableOriginalClone()
             ->disableArgumentCloning()
             ->disallowMockingUnknownTypes()
-            ->getMock();  
+            ->getMock();
 
         $this->userNameUtils = $this->getMockBuilder(UserNameUtils::class)
             ->disableOriginalConstructor()
             ->disableOriginalClone()
             ->disableArgumentCloning()
             ->disallowMockingUnknownTypes()
-            ->getMock();  
+            ->getMock();
 
         $this->userGroupManager = $this->getMockBuilder(UserGroupManager::class)
             ->disableOriginalConstructor()
             ->disableOriginalClone()
             ->disableArgumentCloning()
             ->disallowMockingUnknownTypes()
-            ->getMock();  
+            ->getMock();
 
-        $this->changeReason = '';  
+        $this->changeReason = '';
         $this->password = 'test#0309!';
-        
+
         $idUser = 1;
         $this->user = UserAccount::newFromId( $idUser );
 		$id_mUser = 2;
@@ -103,7 +103,7 @@ class UserTest extends TestCase {
 
         $this->checkFunction = $this->userToEdit->setEmail( $newEmail, $this->mUser, $this->mTempUser, $this->userManager, $this->user, $this->changeReason );
         $this->assertTrue($this->checkFunction, 'Function setEmail() returns false, check everything once again!');
-    }   
+    }
 
     public function testSetRealName() {
         $realName = 'Test Purpose';
@@ -154,7 +154,7 @@ class UserTest extends TestCase {
 
     public function testCloseUserAccount() {
         $this->closeAccount = new Close($this->userGroupManager, $this->userNameUtils, $this->userManager, $this->passFactory);
-        
+
         $this->checkFunction = $this->userToEdit->closeUserAccount( $this->mUser, $this->passFactory, $this->userManager, $this->closeAccount, $this->changeReason );
         $this->assertTrue($this->checkFunction, 'Function closeUserAccount() returns false, check everything once again!');
     }

@@ -161,7 +161,7 @@ class CloseAccount extends EditAccount {
 				if ( $checkMasterClassAvatar ) {
 					$this->mStatusMsg2 = $this->msg( 'editaccount-remove-avatar-fail' )->plain();
 					$this->mStatus = $this->mStatusMsg2;
-				} 
+				}
 				$this->mStatusMsg = $this->msg( 'editaccount-success-close', $mUser->mName )->text();
 				$this->mStatus = $this->mStatusMsg;
 				$color = 'darkgreen';

@@ -30,7 +30,7 @@ class User {
 	/**
 	 * Get User who is going to be edited
 	 *
-	 * @return User 
+	 * @return User
 	 */
 	public function getUserToEdit() {
 		return $this->mUser;
@@ -39,7 +39,7 @@ class User {
 	/**
 	 * Get temporary user who is going to be assigned as User
 	 *
-	 * @return User 
+	 * @return User
 	 */
 	public function getTempUser() {
 		return $this->mTempUser;
@@ -48,7 +48,7 @@ class User {
 	/**
 	 * Get User who is logged in to the system
 	 *
-	 * @return User 
+	 * @return User
 	 */
 	public function getLoggedUser() {
 		return $this->user;
@@ -60,7 +60,7 @@ class User {
 	 * Set a user's e-mail
 	 *
 	 * @param string $email E-mail address to set to the user
-	 * @param UserAccount $mUser 
+	 * @param UserAccount $mUser
 	 * @param UserAccount $mTempUser
 	 * @param UserManager $userOptionsManager
 	 * @param UserAccount $user
@@ -411,13 +411,13 @@ class User {
 		return md5( mt_rand( 0, 0x7fffffff ) . $salt );
 	}
 
-	// methods for CloseAccount feature 
+	// methods for CloseAccount feature
 
 	/**
 	 * Scrambles the user's password, sets an empty e-mail and marks the
-	 * account as disabled; 
+	 * account as disabled;
 	 * Activated by clicking on Closes the user account option on page Special Pages
-	 * 
+	 *
 	 * @param UserAccount $mUser
 	 * @param PassFactory $passFactory
 	 * @param UserManager $userOptionsManager
@@ -497,9 +497,9 @@ class User {
 	}
 
 	/**
-	 * Check if Masterhead class exists 
+	 * Check if Masterhead class exists
 	 *
-	 * @return bool True on success, false on failure 
+	 * @return bool True on success, false on failure
 	 */
 	public function checkMasterClass( UserAccount $mUser ) {
 		if ( class_exists( 'Masthead' ) ) {
@@ -509,7 +509,7 @@ class User {
 				if ( !$avatar->removeFile( false ) ) {
 					// don't quit here, since the avatar is a non-critical part
 					// of closing, but flag for later
-					
+
 					return true;
 				}
 			}
