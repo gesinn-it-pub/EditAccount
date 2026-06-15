@@ -33,7 +33,7 @@ class EditAccountSelectUserTemplate extends QuickTemplate {
 <!-- s:<?php echo __FILE__ ?> -->
 		<form method="post" id="edit-account-select-form" action="">
 			<fieldset>
-				<input type="text" name="wpUserName" value="<?php echo $user_hsc; ?>" />
+				<input type="text" name="wpUserName" class="mw-autocomplete-user" value="<?php echo $user_hsc; ?>" />
 				<input type="submit" value="<?php echo wfMessage( 'editaccount-submit-account' )->plain(); ?>" />
 				<input type="hidden" name="wpAction" value="displayuser" />
 			</fieldset>

@@ -88,7 +88,8 @@
 				"displayuser.js"
 			],
 			"dependencies": [
-				"jquery"
+				"jquery",
+				"mediawiki.userSuggest"
 			]
 		}
 	},
