@@ -39,7 +39,7 @@
 	"editaccount-submit-cleardisable": "Deaktivierungsmarkierung entfernen",
 	"editaccount-submit-close": "Benutzerkonto schließen",
 	"editaccount-submit-button": "Speichern",
-	"editaccount-usage-close": "Durch Klicken auf „Benutzerkonto schließen" wird das Konto dauerhaft deaktiviert: Das Passwort wird zerwürfelt, die E-Mail-Adresse entfernt und das Konto als deaktiviert markiert. Dies kann nicht rückgängig gemacht werden.",
+	"editaccount-usage-close": "Durch Klicken auf „Benutzerkonto schließen\" wird das Konto dauerhaft deaktiviert: Das Passwort wird zerwürfelt, die E-Mail-Adresse entfernt und das Konto als deaktiviert markiert. Dies kann nicht rückgängig gemacht werden.",
 	"editaccount-warning-close": "<b>Achtung!</b> Du bist gerade dabei, das Konto von Benutzer <b>$1</b> dauerhaft zu deaktivieren. Dies kann nicht rückgängig gemacht werden. Bist du sicher, dass du das tun möchtest?",
 	"editaccount-status": "Statusmeldung",
 	"editaccount-success-email": "Die E-Mail-Adresse des Benutzerkontos $1 wurde erfolgreich zu $2 geändert.",
