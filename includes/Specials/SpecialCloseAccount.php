@@ -17,28 +17,27 @@ use MediaWiki\User\UserNameUtils;
 use MediaWiki\User\UserOptionsManager;
 use MediaWiki\Extension\EditAccount\User as UserToDeactivate;
 
-// @note Extends EditAccount so that we don't have to duplicate closeAccount() etc.
-class CloseAccount extends EditAccount {
+class CloseAccount extends SpecialPage {
 
-	/**
-	 * @var null|User User object for the account that is to be disabled
-	 */
-	public ?User $mUser;
-	/** @var UserToDeactivate|null */
-	public ?UserToDeactivate $UserToDeactivate = null;
+	/** @var User|null */
+	public ?User $mUser = null;
 	/** @var User|null */
 	public ?User $mTempUser = null;
+	/** @var bool|null */
+	private ?bool $mStatus = null;
+	/** @var string|null */
+	private ?string $mStatusMsg = null;
+	/** @var string|null */
+	private ?string $mStatusMsg2 = null;
 
-	/** @var UserOptionsManager */
-	private UserOptionsManager $userOptionsManager;
-
-	/**
-	 * @var UserGroupManager
-	 */
+	/** @var UserGroupManager */
 	private UserGroupManager $userGroupManager;
 
 	/** @var UserNameUtils */
 	private UserNameUtils $userNameUtils;
+
+	/** @var UserOptionsManager */
+	private UserOptionsManager $userOptionsManager;
 
 	/** @var PasswordFactory */
 	private PasswordFactory $passwordFactory;
@@ -121,6 +120,7 @@ class CloseAccount extends EditAccount {
 		$effectiveGroups = $this->userGroupManager->getUserEffectiveGroups( $user );
 		if ( in_array( 'staff', $effectiveGroups ) ) {
 			$out->redirect( SpecialPage::getTitleFor( 'EditAccount' )->getFullURL() );
+			return;
 		}
 
 		// Set page title and other stuff
