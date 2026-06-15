@@ -3,7 +3,9 @@
 namespace MediaWiki\Extension\EditAccount;
 
 use MediaWiki\Extension\EditAccount\User as UserToEdit;
-use MediaWiki\MediaWikiServices;
+use MediaWiki\Linker\LinkRenderer;
+use MediaWiki\User\UserFactory;
+use MediaWiki\User\UserIdentityLookup;
 use MediaWiki\User\UserNameUtils;
 use MediaWiki\User\UserOptionsManager;
 use PasswordFactory;
@@ -11,6 +13,7 @@ use Sanitizer;
 use SpecialPage;
 use User;
 use UserBlockedError;
+use Wikimedia\Rdbms\ILoadBalancer;
 
 /**
  * Main logic of the EditAccount extension
@@ -49,20 +52,44 @@ class SpecialEditAccount extends SpecialPage {
 	/** @var UserOptionsManager */
 	private UserOptionsManager $userOptionsManager;
 
+	/** @var UserFactory */
+	private UserFactory $userFactory;
+
+	/** @var UserIdentityLookup */
+	private UserIdentityLookup $userIdentityLookup;
+
+	/** @var LinkRenderer */
+	private LinkRenderer $linkRenderer;
+
+	/** @var ILoadBalancer */
+	private ILoadBalancer $loadBalancer;
+
 	/**
 	 * @param PasswordFactory $passwordFactory
 	 * @param UserNameUtils $userNameUtils
 	 * @param UserOptionsManager $userOptionsManager
+	 * @param UserFactory $userFactory
+	 * @param UserIdentityLookup $userIdentityLookup
+	 * @param LinkRenderer $linkRenderer
+	 * @param ILoadBalancer $loadBalancer
 	 */
 	public function __construct(
 		PasswordFactory $passwordFactory,
 		UserNameUtils $userNameUtils,
-		UserOptionsManager $userOptionsManager
+		UserOptionsManager $userOptionsManager,
+		UserFactory $userFactory,
+		UserIdentityLookup $userIdentityLookup,
+		LinkRenderer $linkRenderer,
+		ILoadBalancer $loadBalancer
 	) {
 		parent::__construct( 'EditAccount', 'editaccount' );
 		$this->passwordFactory = $passwordFactory;
 		$this->userNameUtils = $userNameUtils;
 		$this->userOptionsManager = $userOptionsManager;
+		$this->userFactory = $userFactory;
+		$this->userIdentityLookup = $userIdentityLookup;
+		$this->linkRenderer = $linkRenderer;
+		$this->loadBalancer = $loadBalancer;
 	}
 
 	public function doesWrites(): bool {
@@ -101,7 +128,6 @@ class SpecialEditAccount extends SpecialPage {
 		$out = $this->getOutput();
 		$request = $this->getRequest();
 		$user = $this->getUser();
-		$services = MediaWikiServices::getInstance();
 
 		// Redirect mortals to Special:CloseAccount
 		if ( !$user->isAllowed( 'editaccount' ) ) {
@@ -136,9 +162,8 @@ class SpecialEditAccount extends SpecialPage {
 
 			// Check if user name is an existing user
 			if ( $this->userNameUtils->isValid( $userName ) ) {
-				$userFactory = $services->getUserFactory();
-				$this->mUser = $userFactory->newFromName( $userName );
-				$actor = $services->getUserIdentityLookup()->getUserIdentityByName( $userName );
+				$this->mUser = $this->userFactory->newFromName( $userName );
+				$actor = $this->userIdentityLookup->getUserIdentityByName( $userName );
 				$id = $actor ? $actor->getId() : null;
 
 				if ( !$action ) {
@@ -153,7 +178,7 @@ class SpecialEditAccount extends SpecialPage {
 
 					if ( $this->mTempUser ) {
 						$id = $this->mTempUser->getId();
-						$this->mUser = $userFactory->newFromId( $id );
+						$this->mUser = $this->userFactory->newFromId( $id );
 					} else {
 						$this->mStatus = false;
 						$this->mStatusMsg = $this->msg( 'editaccount-nouser', $userName )->text();
@@ -164,10 +189,10 @@ class SpecialEditAccount extends SpecialPage {
 				if ( $this->mTempUser == null ) {
 					$tmpUser = new User();
 					// create an object of User class with reference on mUser who is going to be edited
-					$userToEdit = new UserToEdit( $this->mUser, $tmpUser, $user );
+					$userToEdit = new UserToEdit( $this->mUser, $tmpUser, $user, $this->loadBalancer, $this->userFactory );
 				} else {
 					// create an object of User class with reference on mUser who is going to be edited
-					$userToEdit = new UserToEdit( $this->mUser, $this->mTempUser, $user );
+					$userToEdit = new UserToEdit( $this->mUser, $this->mTempUser, $user, $this->loadBalancer, $this->userFactory );
 				}
 
 				$mUser = $userToEdit->getUserToEdit();
@@ -295,7 +320,7 @@ class SpecialEditAccount extends SpecialPage {
 		$templateClassName = 'EditAccount' . $template . 'Template';
 		$tmpl = new $templateClassName;
 
-		$linkRenderer = $services->getLinkRenderer();
+		$linkRenderer = $this->linkRenderer;
 		$templateVariables = [
 			'status' => $this->mStatus,
 			'statusMsg' => $this->mStatusMsg,

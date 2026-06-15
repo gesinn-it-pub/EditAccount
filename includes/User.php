@@ -2,11 +2,12 @@
 
 namespace MediaWiki\Extension\EditAccount;
 
-use User as UserAccount;
+use ManualLogEntry as LogEntry;
+use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserOptionsManager as UserManager;
 use PasswordFactory as PassFactory;
-use ManualLogEntry as LogEntry;
-use MediaWiki\MediaWikiServices as WikiService;
+use User as UserAccount;
+use Wikimedia\Rdbms\ILoadBalancer;
 
 class User {
 
@@ -19,10 +20,24 @@ class User {
 	/** @var UserAccount|null */
 	private ?UserAccount $user;
 
-	public function __construct( UserAccount $mUser, UserAccount $mTempUser, UserAccount $user ) {
+	/** @var ILoadBalancer */
+	private ILoadBalancer $loadBalancer;
+
+	/** @var UserFactory */
+	private UserFactory $userFactory;
+
+	public function __construct(
+		UserAccount $mUser,
+		UserAccount $mTempUser,
+		UserAccount $user,
+		ILoadBalancer $loadBalancer,
+		UserFactory $userFactory
+	) {
 		$this->mUser = $mUser;
 		$this->mTempUser = $mTempUser;
 		$this->user = $user;
+		$this->loadBalancer = $loadBalancer;
+		$this->userFactory = $userFactory;
 	}
 
 	/**
@@ -154,7 +169,7 @@ class User {
 			// throw new MWException( "Passed User has not been added to the database yet!" );
 		}
 
-		$dbw = WikiService::getInstance()->getDBLoadBalancer()->getMaintenanceConnectionRef( DB_PRIMARY );
+		$dbw = $this->loadBalancer->getConnection( DB_PRIMARY );
 		$row = $dbw->selectRow(
 			'user',
 			'user_id',
@@ -241,7 +256,7 @@ class User {
 		$id = $mUser->getId();
 
 		// Reload user
-		$mUser = WikiService::getInstance()->getUserFactory()->newFromId( $id );
+		$mUser = $this->userFactory->newFromId( $id );
 
 		if ( $mUser->getEmail() == '' ) {
 			// ShoutWiki patch begin
@@ -448,7 +463,7 @@ class User {
 		$id = $mUser->getId();
 
 		// Reload user
-		$mUser = WikiService::getInstance()->getUserFactory()->newFromId( $id );
+		$mUser = $this->userFactory->newFromId( $id );
 
 		if ( $mUser->getEmail() == '' ) {
 			// ShoutWiki patch begin

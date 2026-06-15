@@ -11,12 +11,17 @@
 use MediaWiki\Extension\EditAccount\SpecialCloseAccount as Close;
 use MediaWiki\Extension\EditAccount\SpecialEditAccount as Edit;
 use MediaWiki\Extension\EditAccount\User;
+use MediaWiki\Linker\LinkRenderer;
+use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserGroupManager;
+use MediaWiki\User\UserIdentityLookup;
 use MediaWiki\User\UserNameUtils;
 use MediaWiki\User\UserOptionsManager as UserManager;
 use PHPUnit\Framework\TestCase;
 use PasswordFactory as PassFactory;
 use User as UserAccount;
+use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\ILoadBalancer;
 
 /**
  * @group User
@@ -31,6 +36,10 @@ class UserTest extends TestCase {
     private PassFactory $passFactory;
     private UserGroupManager $userGroupManager;
     private UserNameUtils $userNameUtils;
+    private UserFactory $userFactory;
+    private ILoadBalancer $loadBalancer;
+    private UserIdentityLookup $userIdentityLookup;
+    private LinkRenderer $linkRenderer;
     private User $userToEdit;
     private Edit $editAccount;
     private Close $closeAccount;
@@ -69,6 +78,44 @@ class UserTest extends TestCase {
             ->disallowMockingUnknownTypes()
             ->getMock();
 
+        $this->userFactory = $this->getMockBuilder( UserFactory::class )
+            ->disableOriginalConstructor()
+            ->disableOriginalClone()
+            ->disableArgumentCloning()
+            ->disallowMockingUnknownTypes()
+            ->getMock();
+
+        $mockDb = $this->getMockBuilder( IDatabase::class )
+            ->disableOriginalConstructor()
+            ->disableOriginalClone()
+            ->disableArgumentCloning()
+            ->disallowMockingUnknownTypes()
+            ->getMock();
+        $mockDb->method( 'selectRow' )->willReturn( (object)[ 'user_id' => 2 ] );
+        $mockDb->method( 'update' )->willReturn( true );
+
+        $this->loadBalancer = $this->getMockBuilder( ILoadBalancer::class )
+            ->disableOriginalConstructor()
+            ->disableOriginalClone()
+            ->disableArgumentCloning()
+            ->disallowMockingUnknownTypes()
+            ->getMock();
+        $this->loadBalancer->method( 'getConnection' )->willReturn( $mockDb );
+
+        $this->userIdentityLookup = $this->getMockBuilder( UserIdentityLookup::class )
+            ->disableOriginalConstructor()
+            ->disableOriginalClone()
+            ->disableArgumentCloning()
+            ->disallowMockingUnknownTypes()
+            ->getMock();
+
+        $this->linkRenderer = $this->getMockBuilder( LinkRenderer::class )
+            ->disableOriginalConstructor()
+            ->disableOriginalClone()
+            ->disableArgumentCloning()
+            ->disallowMockingUnknownTypes()
+            ->getMock();
+
         $this->changeReason = '';
         $this->password = 'test#0309!';
 
@@ -77,14 +124,20 @@ class UserTest extends TestCase {
 		$id_mUser = 2;
         $this->mUser = UserAccount::newFromId( $id_mUser );
 
+        $this->userFactory->method( 'newFromId' )->willReturn( $this->mUser );
+
         $this->passFactory = new PassFactory();
-        $this->userToEdit = new User( $this->mUser, $this->mTempUser, $this->user );
+        $this->userToEdit = new User( $this->mUser, $this->mTempUser, $this->user, $this->loadBalancer, $this->userFactory );
 	}
 
     protected function tearDown(): void {
         unset( $this->userGroupManager );
         unset( $this->userManager );
         unset( $this->userNameUtils );
+        unset( $this->userFactory );
+        unset( $this->loadBalancer );
+        unset( $this->userIdentityLookup );
+        unset( $this->linkRenderer );
         unset( $this->passFactory );
         unset( $this->mTempUser );
         unset( $this->user );
@@ -131,7 +184,7 @@ class UserTest extends TestCase {
     }
 
     public function testCloseAccount() {
-        $this->editAccount = new Edit( $this->passFactory, $this->userNameUtils, $this->userManager );
+        $this->editAccount = new Edit( $this->passFactory, $this->userNameUtils, $this->userManager, $this->userFactory, $this->userIdentityLookup, $this->linkRenderer, $this->loadBalancer );
 
         $this->checkFunction = $this->userToEdit->closeAccount( $this->mUser, $this->user, $this->passFactory, $this->userManager, $this->editAccount, $this->changeReason );
         $this->assertTrue( $this->checkFunction, 'Function closeAccount() returns false, check everything once again!' );
@@ -173,7 +226,7 @@ class UserTest extends TestCase {
     }
 
     public function testCloseUserAccount() {
-        $this->closeAccount = new Close( $this->userGroupManager, $this->userNameUtils, $this->userManager, $this->passFactory );
+        $this->closeAccount = new Close( $this->userGroupManager, $this->userNameUtils, $this->userManager, $this->passFactory, $this->userFactory, $this->loadBalancer );
 
         $this->checkFunction = $this->userToEdit->closeUserAccount( $this->mUser, $this->passFactory, $this->userManager, $this->closeAccount, $this->changeReason );
         $this->assertTrue( $this->checkFunction, 'Function closeUserAccount() returns false, check everything once again!' );

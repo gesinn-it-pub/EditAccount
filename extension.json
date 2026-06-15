@@ -30,7 +30,11 @@
 			"services": [
 				"PasswordFactory",
 				"UserNameUtils",
-				"UserOptionsManager"
+				"UserOptionsManager",
+				"UserFactory",
+				"UserIdentityLookup",
+				"LinkRenderer",
+				"DBLoadBalancer"
 			]
 		},
 		"CloseAccount": {
@@ -39,7 +43,9 @@
 				"UserGroupManager",
 				"UserNameUtils",
 				"UserOptionsManager",
-				"PasswordFactory"
+				"PasswordFactory",
+				"UserFactory",
+				"DBLoadBalancer"
 			]
 		}
 	},

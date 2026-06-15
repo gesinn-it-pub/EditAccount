@@ -3,7 +3,7 @@
 namespace MediaWiki\Extension\EditAccount;
 
 use MediaWiki\Extension\EditAccount\User as ExtUser;
-use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserGroupManager;
 use MediaWiki\User\UserNameUtils;
 use MediaWiki\User\UserOptionsManager;
@@ -12,6 +12,7 @@ use PermissionsError;
 use SpecialPage;
 use User;
 use UserBlockedError;
+use Wikimedia\Rdbms\ILoadBalancer;
 use Xml;
 
 /**
@@ -50,23 +51,37 @@ class SpecialCloseAccount extends SpecialPage {
 	/** @var PasswordFactory */
 	private PasswordFactory $passwordFactory;
 
+	/** @var UserFactory */
+	private UserFactory $userFactory;
+
+	/** @var ILoadBalancer */
+	private ILoadBalancer $loadBalancer;
+
 	/**
 	 * Constructor -- set up the new special page
-	 *  *
+	 *
 	 * @param UserGroupManager $userGroupManager
 	 * @param UserNameUtils $userNameUtils
+	 * @param UserOptionsManager $userOptionsManager
+	 * @param PasswordFactory $passwordFactory
+	 * @param UserFactory $userFactory
+	 * @param ILoadBalancer $loadBalancer
 	 */
 	public function __construct(
 		UserGroupManager $userGroupManager,
 		UserNameUtils $userNameUtils,
 		UserOptionsManager $userOptionsManager,
-		PasswordFactory $passwordFactory
+		PasswordFactory $passwordFactory,
+		UserFactory $userFactory,
+		ILoadBalancer $loadBalancer
 	) {
 		SpecialPage::__construct( 'CloseAccount' );
 		$this->userGroupManager = $userGroupManager;
 		$this->userNameUtils = $userNameUtils;
 		$this->userOptionsManager = $userOptionsManager;
 		$this->passwordFactory = $passwordFactory;
+		$this->userFactory = $userFactory;
+		$this->loadBalancer = $loadBalancer;
 	}
 
 	/**
@@ -146,16 +161,16 @@ class SpecialCloseAccount extends SpecialPage {
 
 		// Check if user name is an existing user
 		if ( $this->userNameUtils->isValid( $userName ) ) {
-			$this->mUser = MediaWikiServices::getInstance()->getUserFactory()->newFromName( $userName );
+			$this->mUser = $this->userFactory->newFromName( $userName );
 		}
 
 		if ( $this->mTempUser == null ) {
 			$tmpUser = new User();
 			// create an object of User class with reference on mUser who is going to be deactivated
-			$userToDeactivate = new ExtUser( $this->mUser, $tmpUser, $user );
+			$userToDeactivate = new ExtUser( $this->mUser, $tmpUser, $user, $this->loadBalancer, $this->userFactory );
 		} else {
 			// create an object of User class with reference on mUser who is going to be deactivated
-			$userToDeactivate = new ExtUser( $this->mUser, $this->mTempUser, $user );
+			$userToDeactivate = new ExtUser( $this->mUser, $this->mTempUser, $user, $this->loadBalancer, $this->userFactory );
 		}
 
 		$mUser = $userToDeactivate->getUserToEdit();
