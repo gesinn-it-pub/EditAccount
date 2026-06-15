@@ -70,7 +70,8 @@
 		"User": "includes/User.php"
 	},
 	"Hooks": {
-		"AdminLinks": "EditAccountHooks::addToAdminLinks"
+		"AdminLinks": "EditAccountHooks::addToAdminLinks",
+		"SpecialContributionsBeforeMainOutput": "EditAccountHooks::onSpecialContributionsBeforeMainOutput"
 	},
 	"ResourceModules": {
 		"ext.editAccount": {
@@ -91,5 +92,5 @@
 			]
 		}
 	},
-	"manifest_version": 1
+	"manifest_version": 2
 }
