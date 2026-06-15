@@ -6,6 +6,16 @@ This project adheres to [Semantic Versioning](https://semver.org/) and
 
 ## [Unreleased]
 
+## [3.0.1] - 2026-06-15
+
+Updates all development dependencies and bumps the CI matrix to PHP 8.3 for MW 1.43.
+
+### Changed
+- Bump `mediawiki/mediawiki-phan-config` from 0.14.0 to 0.20.0 [`60ad0c4`](https://github.com/gesinn-it-pub/EditAccount/commit/60ad0c4)
+- Bump `mediawiki/mediawiki-codesniffer` from 43.0.0 to 48.0.0 [`6f0e406`](https://github.com/gesinn-it-pub/EditAccount/commit/6f0e406)
+- Update npm dependencies, bump grunt to 1.6.2 to fix minimatch ReDoS vulnerabilities [`7b69f4c`](https://github.com/gesinn-it-pub/EditAccount/commit/7b69f4c)
+- Bump CI matrix for MW 1.43 from PHP 8.1 to 8.3 [`2dc41f5`](https://github.com/gesinn-it-pub/EditAccount/commit/2dc41f5)
+
 ## [3.0.0] - 2026-06-15
 
 Major rewrite modernising the extension for MediaWiki 1.36+: full namespace migration,
@@ -31,5 +41,6 @@ random token generation.
 - Update i18n messages to use sitename [`50cea4d`](https://github.com/gesinn-it-pub/EditAccount/commit/50cea4d)
 - Add README with Codecov badge, description, installation and usage [`3e7b510`](https://github.com/gesinn-it-pub/EditAccount/commit/3e7b510)
 
-[Unreleased]: https://github.com/gesinn-it-pub/EditAccount/compare/3.0.0...HEAD
+[Unreleased]: https://github.com/gesinn-it-pub/EditAccount/compare/3.0.1...HEAD
+[3.0.1]: https://github.com/gesinn-it-pub/EditAccount/compare/3.0.0...3.0.1
 [3.0.0]: https://github.com/gesinn-it-pub/EditAccount/releases/tag/3.0.0
