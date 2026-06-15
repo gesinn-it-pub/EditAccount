@@ -1,0 +1,220 @@
+<?php
+/**
+ * MediaWiki EditAccount Extension
+ *
+ * @link https://github.com/gesinn-it/EditAccount
+ *
+ * @author gesinn.it GmbH & Co. KG
+ * @license MIT
+ */
+
+use MediaWiki\Extension\EditAccount\SpecialCloseAccount as Close;
+use MediaWiki\Extension\EditAccount\SpecialEditAccount as Edit;
+use MediaWiki\Extension\EditAccount\User;
+use MediaWiki\Linker\LinkRenderer;
+use MediaWiki\User\UserFactory;
+use MediaWiki\User\UserGroupManager;
+use MediaWiki\User\UserIdentityLookup;
+use MediaWiki\User\UserNameUtils;
+use MediaWiki\User\UserOptionsManager as UserManager;
+use PasswordFactory as PassFactory;
+use User as UserAccount;
+use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\ILoadBalancer;
+
+/**
+ * @group Integration
+ * @group Database
+ * @covers \MediaWiki\Extension\EditAccount\User
+ */
+class UserIntegrationTest extends MediaWikiIntegrationTestCase {
+
+    private UserAccount $mUser;
+    private UserAccount $mTempUser;
+    private UserAccount $user;
+    private UserManager $userManager;
+    private PassFactory $passFactory;
+    private UserGroupManager $userGroupManager;
+    private UserNameUtils $userNameUtils;
+    private UserFactory $userFactory;
+    private ILoadBalancer $loadBalancer;
+    private UserIdentityLookup $userIdentityLookup;
+    private LinkRenderer $linkRenderer;
+    private User $userToEdit;
+    private string $changeReason;
+    private bool $checkFunction;
+    private string $password;
+
+    protected function setUp(): void {
+        parent::setUp();
+
+        $this->userManager = $this->getMockBuilder( UserManager::class )
+            ->disableOriginalConstructor()
+            ->disableOriginalClone()
+            ->disableArgumentCloning()
+            ->disallowMockingUnknownTypes()
+            ->getMock();
+
+        $this->mTempUser = $this->getMockBuilder( UserAccount::class )
+            ->disableOriginalConstructor()
+            ->disableOriginalClone()
+            ->disableArgumentCloning()
+            ->disallowMockingUnknownTypes()
+            ->getMock();
+
+        $this->userNameUtils = $this->getMockBuilder( UserNameUtils::class )
+            ->disableOriginalConstructor()
+            ->disableOriginalClone()
+            ->disableArgumentCloning()
+            ->disallowMockingUnknownTypes()
+            ->getMock();
+
+        $this->userGroupManager = $this->getMockBuilder( UserGroupManager::class )
+            ->disableOriginalConstructor()
+            ->disableOriginalClone()
+            ->disableArgumentCloning()
+            ->disallowMockingUnknownTypes()
+            ->getMock();
+
+        $this->userFactory = $this->getMockBuilder( UserFactory::class )
+            ->disableOriginalConstructor()
+            ->disableOriginalClone()
+            ->disableArgumentCloning()
+            ->disallowMockingUnknownTypes()
+            ->getMock();
+
+        $mockDb = $this->getMockBuilder( IDatabase::class )
+            ->disableOriginalConstructor()
+            ->disableOriginalClone()
+            ->disableArgumentCloning()
+            ->disallowMockingUnknownTypes()
+            ->getMock();
+        $mockDb->method( 'selectRow' )->willReturn( (object)[ 'user_id' => 2 ] );
+        $mockDb->method( 'update' )->willReturn( true );
+
+        $this->loadBalancer = $this->getMockBuilder( ILoadBalancer::class )
+            ->disableOriginalConstructor()
+            ->disableOriginalClone()
+            ->disableArgumentCloning()
+            ->disallowMockingUnknownTypes()
+            ->getMock();
+        $this->loadBalancer->method( 'getConnection' )->willReturn( $mockDb );
+
+        $this->userIdentityLookup = $this->getMockBuilder( UserIdentityLookup::class )
+            ->disableOriginalConstructor()
+            ->disableOriginalClone()
+            ->disableArgumentCloning()
+            ->disallowMockingUnknownTypes()
+            ->getMock();
+
+        $this->linkRenderer = $this->getMockBuilder( LinkRenderer::class )
+            ->disableOriginalConstructor()
+            ->disableOriginalClone()
+            ->disableArgumentCloning()
+            ->disallowMockingUnknownTypes()
+            ->getMock();
+
+        $this->changeReason = '';
+        $this->password = 'test#0309!';
+
+        $this->user = $this->getMutableTestUser()->getUser();
+        $this->mUser = $this->getMutableTestUser()->getUser();
+
+        $this->userFactory->method( 'newFromId' )->willReturn( $this->mUser );
+
+        $this->passFactory = new PassFactory();
+        $this->userToEdit = new User( $this->mUser, $this->mTempUser, $this->user, $this->loadBalancer, $this->userFactory );
+    }
+
+    protected function tearDown(): void {
+        unset( $this->userGroupManager );
+        unset( $this->userManager );
+        unset( $this->userNameUtils );
+        unset( $this->userFactory );
+        unset( $this->loadBalancer );
+        unset( $this->userIdentityLookup );
+        unset( $this->linkRenderer );
+        unset( $this->passFactory );
+        unset( $this->mTempUser );
+        unset( $this->user );
+        unset( $this->mUser );
+        unset( $this->userToEdit );
+        parent::tearDown();
+    }
+
+    public function testSetEmail() {
+        $newEmail = 'testing@gmail.com';
+        $oldEmail = 'test@gmail.com';
+        $name = 'Marko991';
+        $this->user->setName( $name );
+        $this->mUser->setName( $name );
+        $this->mUser->setEmail( $oldEmail );
+
+        $this->checkFunction = $this->userToEdit->setEmail( $newEmail, $this->mUser, $this->mTempUser, $this->userManager, $this->user, $this->changeReason );
+        $this->assertTrue( $this->checkFunction, 'Function setEmail() returns false, check everything once again!' );
+    }
+
+    public function testSetRealName() {
+        $realName = 'Test Purpose';
+
+        $this->checkFunction = $this->userToEdit->setRealName( $realName, $this->mUser, $this->user, $this->changeReason );
+        $this->assertTrue( $this->checkFunction, 'Function setRealName() returns false, check everything once again!' );
+    }
+
+    public function testValidateMail() {
+        $email_first = 'emailTesting';
+        $email_second = 'test@gmail.com';
+
+        $this->assertFalse( ( Sanitizer::validateEmail( $email_first ) ), "Added Email is valid!" );
+        $this->assertTrue( ( Sanitizer::validateEmail( $email_second ) ), "Added Email is not valid!" );
+    }
+
+    public function testClearUnsubscribe() {
+        $this->checkFunction = $this->userToEdit->clearUnsubscribe( $this->userManager, $this->mUser );
+        $this->assertTrue( $this->checkFunction, 'Function clearUnsubscribe() returns false, check everything once again!' );
+    }
+
+    public function testClearDisable() {
+        $this->checkFunction = $this->userToEdit->clearDisable( $this->userManager, $this->mUser );
+        $this->assertTrue( $this->checkFunction, 'Function clearDisable() returns false, check everything once again!' );
+    }
+
+    public function testCloseAccount() {
+        $editAccount = new Edit( $this->passFactory, $this->userNameUtils, $this->userManager, $this->userFactory, $this->userIdentityLookup, $this->linkRenderer, $this->loadBalancer );
+
+        $this->checkFunction = $this->userToEdit->closeAccount( $this->mUser, $this->user, $this->passFactory, $this->userManager, $editAccount, $this->changeReason );
+        $this->assertTrue( $this->checkFunction, 'Function closeAccount() returns false, check everything once again!' );
+    }
+
+    public function testSetPasswordForUser() {
+        $this->checkFunction = $this->userToEdit->setPasswordForUser( $this->mUser, $this->password, $this->passFactory );
+        $this->assertTrue( $this->checkFunction, 'Function setPasswordForUser() returns false, check everything once again!' );
+    }
+
+    public function testSetPassword() {
+        $this->checkFunction = $this->userToEdit->setPassword( $this->password, $this->mUser, $this->mTempUser, $this->passFactory, $this->user, $this->changeReason );
+        $this->assertTrue( $this->checkFunction, 'Function setPassword() returns false, check everything once again!' );
+    }
+
+    public function testToggleAdopterStatus() {
+        $this->checkFunction = $this->userToEdit->toggleAdopterStatus( $this->userManager, $this->mUser );
+        $this->assertTrue( $this->checkFunction, 'Function toggleAdopterStatus() returns false, check everything once again!' );
+    }
+
+    public function testGenerateRandomScrambledPasswordEndsWithRequiredChars() {
+        $password = $this->userToEdit->generateRandomScrambledPassword();
+        $this->assertStringEndsWith( 'A1a', $password );
+    }
+
+    public function testGenerateRandomScrambledPasswordHasMinimumLength() {
+        $password = $this->userToEdit->generateRandomScrambledPassword();
+        $this->assertGreaterThanOrEqual( 35, strlen( $password ) );
+    }
+
+    public function testCloseUserAccount() {
+        $closeAccount = new Close( $this->userGroupManager, $this->userNameUtils, $this->userManager, $this->passFactory, $this->userFactory, $this->loadBalancer );
+
+        $this->checkFunction = $this->userToEdit->closeUserAccount( $this->mUser, $this->passFactory, $this->userManager, $closeAccount, $this->changeReason );
+        $this->assertTrue( $this->checkFunction, 'Function closeUserAccount() returns false, check everything once again!' );
+    }
+}

@@ -1,12 +1,15 @@
 <phpunit colors="true">
     <testsuites>
-        <testsuite name="tests">
+        <testsuite name="unit">
             <directory>tests/phpunit/Unit</directory>
         </testsuite>
+        <testsuite name="integration">
+            <directory>tests/phpunit/Integration</directory>
+        </testsuite>
     </testsuites>
-    <filter>
-        <whitelist addUncoveredFilesFromWhitelist="false">
+    <coverage>
+        <include>
             <directory suffix=".php">includes</directory>
-        </whitelist>
-    </filter>
+        </include>
+    </coverage>
 </phpunit>
