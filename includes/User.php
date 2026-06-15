@@ -7,8 +7,6 @@ use MediaWiki\User\UserOptionsManager as UserManager;
 use PasswordFactory as PassFactory;
 use ManualLogEntry as LogEntry;
 use MediaWiki\MediaWikiServices as WikiService;
-use EditAccount as Edit;
-use CloseAccount as Close;
 
 class User {
 
@@ -217,11 +215,11 @@ class User {
 	 * @param UserAccount $user
 	 * @param PassFactory $passFactory
 	 * @param UserManager $userOptionsManager
-	 * @param Edit $editAccount
+	 * @param SpecialEditAccount $editAccount
 	 * @param string $changeReason Reason for change
 	 * @return bool True on success, false on failure
 	 */
-	public function closeAccount( UserAccount $mUser, UserAccount $user, PassFactory $passFactory, UserManager $userOptionsManager, Edit $editAccount, string $changeReason = '' ): bool {
+	public function closeAccount( UserAccount $mUser, UserAccount $user, PassFactory $passFactory, UserManager $userOptionsManager, SpecialEditAccount $editAccount, string $changeReason = '' ): bool {
 		// Set flag for Special:Contributions
 		// NOTE: requires FlagClosedAccounts.php to be included separately
 		if ( defined( 'CLOSED_ACCOUNT_FLAG' ) ) {
@@ -412,11 +410,11 @@ class User {
 	 * @param UserAccount $mUser
 	 * @param PassFactory $passFactory
 	 * @param UserManager $userOptionsManager
-	 * @param Close $closeAccount
+	 * @param SpecialCloseAccount $closeAccount
 	 * @param string $changeReason Reason for change
 	 * @return bool True on success, false on failure
 	 */
-	public function closeUserAccount( UserAccount $mUser, PassFactory $passFactory, UserManager $userOptionsManager, Close $closeAccount, string $changeReason = '' ): bool {
+	public function closeUserAccount( UserAccount $mUser, PassFactory $passFactory, UserManager $userOptionsManager, SpecialCloseAccount $closeAccount, string $changeReason = '' ): bool {
 		// Set flag for Special:Contributions
 		// NOTE: requires FlagClosedAccounts.php to be included separately
 		if ( defined( 'CLOSED_ACCOUNT_FLAG' ) ) {

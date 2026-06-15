@@ -8,8 +8,8 @@
  * @license MIT
  */
 
-use CloseAccount as Close;
-use EditAccount as Edit;
+use MediaWiki\Extension\EditAccount\SpecialCloseAccount as Close;
+use MediaWiki\Extension\EditAccount\SpecialEditAccount as Edit;
 use MediaWiki\Extension\EditAccount\User;
 use MediaWiki\User\UserGroupManager;
 use MediaWiki\User\UserNameUtils;

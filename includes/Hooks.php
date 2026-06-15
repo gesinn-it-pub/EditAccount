@@ -1,6 +1,14 @@
 <?php
 
-class EditAccountHooks {
+namespace MediaWiki\Extension\EditAccount;
+
+use ALItem;
+use ALRow;
+use OutputPage;
+use Skin;
+use User;
+
+class Hooks {
 	/**
 	 * Add a link to 'Special:ApprovedPages' to the page
 	 * 'Special:AdminLinks', defined by the Admin Links extension.
@@ -31,7 +39,7 @@ class EditAccountHooks {
 		OutputPage $out,
 		Skin $skin
 	): bool {
-		if ( !EditAccount::isAccountDisabled( $user ) ) {
+		if ( !SpecialEditAccount::isAccountDisabled( $user ) ) {
 			return true;
 		}
 		$out->wrapWikiMsg(

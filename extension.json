@@ -26,7 +26,7 @@
 	],
 	"SpecialPages": {
 		"EditAccount": {
-			"class": "EditAccount",
+			"class": "MediaWiki\\Extension\\EditAccount\\SpecialEditAccount",
 			"services": [
 				"PasswordFactory",
 				"UserNameUtils",
@@ -34,7 +34,7 @@
 			]
 		},
 		"CloseAccount": {
-			"class": "CloseAccount",
+			"class": "MediaWiki\\Extension\\EditAccount\\SpecialCloseAccount",
 			"services": [
 				"UserGroupManager",
 				"UserNameUtils",
@@ -63,15 +63,9 @@
 	"ExtensionMessagesFiles": {
 		"EditAccountAliases": "EditAccount.alias.php"
 	},
-	"AutoloadClasses": {
-		"CloseAccount": "includes/Specials/SpecialCloseAccount.php",
-		"EditAccount": "includes/Specials/SpecialEditAccount.php",
-		"EditAccountHooks": "includes/Hooks.php",
-		"User": "includes/User.php"
-	},
 	"Hooks": {
-		"AdminLinks": "EditAccountHooks::addToAdminLinks",
-		"SpecialContributionsBeforeMainOutput": "EditAccountHooks::onSpecialContributionsBeforeMainOutput"
+		"AdminLinks": "MediaWiki\\Extension\\EditAccount\\Hooks::addToAdminLinks",
+		"SpecialContributionsBeforeMainOutput": "MediaWiki\\Extension\\EditAccount\\Hooks::onSpecialContributionsBeforeMainOutput"
 	},
 	"ResourceModules": {
 		"ext.editAccount": {

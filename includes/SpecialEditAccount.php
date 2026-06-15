@@ -1,9 +1,16 @@
 <?php
 
+namespace MediaWiki\Extension\EditAccount;
+
 use MediaWiki\Extension\EditAccount\User as UserToEdit;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\User\UserNameUtils;
 use MediaWiki\User\UserOptionsManager;
+use PasswordFactory;
+use Sanitizer;
+use SpecialPage;
+use User;
+use UserBlockedError;
 
 /**
  * Main logic of the EditAccount extension
@@ -16,7 +23,7 @@ use MediaWiki\User\UserOptionsManager;
  * @license GPL-2.0-or-later
  */
 
-class EditAccount extends SpecialPage {
+class SpecialEditAccount extends SpecialPage {
 
 	/** @var User|null */
 	public ?User $mUser = null;
@@ -284,7 +291,7 @@ class EditAccount extends SpecialPage {
 
 		// Load the correct template file, build the class name and initiate a
 		// new template object (so that we can set variables later on)
-		include __DIR__ . '/../../templates/' . strtolower( $template ) . '.tmpl.php';
+		include __DIR__ . '/../templates/' . strtolower( $template ) . '.tmpl.php';
 		$templateClassName = 'EditAccount' . $template . 'Template';
 		$tmpl = new $templateClassName;
 

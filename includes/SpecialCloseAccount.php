@@ -1,5 +1,19 @@
 <?php
 
+namespace MediaWiki\Extension\EditAccount;
+
+use MediaWiki\Extension\EditAccount\User as ExtUser;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserGroupManager;
+use MediaWiki\User\UserNameUtils;
+use MediaWiki\User\UserOptionsManager;
+use PasswordFactory;
+use PermissionsError;
+use SpecialPage;
+use User;
+use UserBlockedError;
+use Xml;
+
 /**
  * A special page to allow mortals to close their accounts.
  * Originally used to be a part of the main EditAccount special page, but a
@@ -11,13 +25,7 @@
  * @date 27 February 2015
  * @see https://bugzilla.shoutwiki.com/show_bug.cgi?id=294
  */
-use MediaWiki\MediaWikiServices;
-use MediaWiki\User\UserGroupManager;
-use MediaWiki\User\UserNameUtils;
-use MediaWiki\User\UserOptionsManager;
-use MediaWiki\Extension\EditAccount\User as UserToDeactivate;
-
-class CloseAccount extends SpecialPage {
+class SpecialCloseAccount extends SpecialPage {
 
 	/** @var User|null */
 	public ?User $mUser = null;
@@ -144,10 +152,10 @@ class CloseAccount extends SpecialPage {
 		if ( $this->mTempUser == null ) {
 			$tmpUser = new User();
 			// create an object of User class with reference on mUser who is going to be deactivated
-			$userToDeactivate = new UserToDeactivate( $this->mUser, $tmpUser, $user );
+			$userToDeactivate = new ExtUser( $this->mUser, $tmpUser, $user );
 		} else {
 			// create an object of User class with reference on mUser who is going to be deactivated
-			$userToDeactivate = new UserToDeactivate( $this->mUser, $this->mTempUser, $user );
+			$userToDeactivate = new ExtUser( $this->mUser, $this->mTempUser, $user );
 		}
 
 		$mUser = $userToDeactivate->getUserToEdit();
@@ -179,7 +187,7 @@ class CloseAccount extends SpecialPage {
 			);
 		} else {
 			// Load the correct template file and initiate a new template object
-			include __DIR__ . '/../../templates/closeaccount.tmpl.php';
+			include __DIR__ . '/../templates/closeaccount.tmpl.php';
 			$tmpl = new EditAccountCloseAccountTemplate;
 
 			$templateVariables = [
