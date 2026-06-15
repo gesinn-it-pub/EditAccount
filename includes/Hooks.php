@@ -15,4 +15,30 @@ class EditAccountHooks {
 		$extensions_row->addItem( ALItem::newFromSpecialPage( 'EditAccount' ), 'Userrights' );
 		return true;
 	}
+
+	/**
+	 * Show a notice on Special:Contributions for disabled accounts.
+	 *
+	 * @param int $id User ID being viewed
+	 * @param User $user User object being viewed
+	 * @param OutputPage $out
+	 * @param Skin $skin
+	 * @return bool
+	 */
+	public static function onSpecialContributionsBeforeMainOutput(
+		int $id,
+		User $user,
+		OutputPage $out,
+		Skin $skin
+	): bool {
+		if ( !EditAccount::isAccountDisabled( $user ) ) {
+			return true;
+		}
+		$out->wrapWikiMsg(
+			"<div class=\"errorbox account-disabled-box\" style=\"padding: 1em;\">\n$1\n</div>",
+			'edit-account-closed-flag'
+		);
+		$out->addHTML( '<br clear="both" />' );
+		return true;
+	}
 }

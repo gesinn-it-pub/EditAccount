@@ -20,39 +20,4 @@ if ( !defined( 'MEDIAWIKI' ) ) {
 
 define( 'CLOSED_ACCOUNT_FLAG', 'Account Disabled' );
 
-$wgHooks['SpecialContributionsBeforeMainOutput'][] = 'efFlagClosedAccounts';
-
 $wgMessagesDirs['EditAccount'] = __DIR__ . '/i18n';
-
-/**
- * @param int $id
- * @return bool
- */
-function efFlagClosedAccounts( $id ) {
-	$u = User::newFromId( $id );
-	// Quick safeguard, *just* in case...probably not even needed.
-	if ( !$u instanceof User ) {
-		return true;
-	}
-
-	// ShoutWiki patch begin
-	// Correctly show the "This account has been disabled" box on wikis other
-	// than the central wiki (ShoutWiki Hub)
-	// @date 27 October 2013
-	// @author Jack Phoenix <jack@shoutwiki.com>
-	$isDisabled = EditAccount::isAccountDisabled( $u );
-	# $disOpt = $u->getOption( 'disabled' );
-
-	if ( $isDisabled ) {
-	/*if ( !empty( $disOpt ) ) {*/
-	// ShoutWiki patch end
-		global $wgOut;
-		$wgOut->wrapWikiMsg(
-			"<div class=\"errorbox account-disabled-box\" style=\"padding: 1em;\">\n$1\n</div>",
-			'edit-account-closed-flag'
-		);
-		$wgOut->addHTML( '<br clear="both" />' );
-	}
-
-	return true;
-}
