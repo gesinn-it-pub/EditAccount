@@ -461,7 +461,7 @@ class User {
 		// Reload user
 		$mUser = WikiService::getInstance()->getUserFactory()->newFromId( $id );
 
-		if ( $this->mUser->getEmail() == '' ) {
+		if ( $mUser->getEmail() == '' ) {
 			// ShoutWiki patch begin
 			$this->setDisabled();
 			// ShoutWiki patch end

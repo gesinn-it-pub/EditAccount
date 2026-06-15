@@ -30,8 +30,7 @@
 			"services": [
 				"PasswordFactory",
 				"UserNameUtils",
-				"UserOptionsManager",
-				"MainWANObjectCache"
+				"UserOptionsManager"
 			]
 		},
 		"CloseAccount": {

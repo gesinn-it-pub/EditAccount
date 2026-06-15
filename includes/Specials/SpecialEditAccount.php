@@ -98,8 +98,8 @@ class EditAccount extends SpecialPage {
 
 		// Redirect mortals to Special:CloseAccount
 		if ( !$user->isAllowed( 'editaccount' ) ) {
-			// throw new PermissionsError( 'editaccount' );
 			$out->redirect( SpecialPage::getTitleFor( 'CloseAccount' )->getFullURL() );
+			return;
 		}
 
 		// Show a message if the database is in read-only mode
