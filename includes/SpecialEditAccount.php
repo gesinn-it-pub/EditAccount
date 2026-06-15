@@ -19,14 +19,11 @@ use Wikimedia\Rdbms\ILoadBalancer;
 /**
  * Main logic of the EditAccount extension
  *
- * @file
  * @ingroup Extensions
  * @author Łukasz Garczewski (TOR) <tor@wikia-inc.com>
- * @date 2008-09-17
  * @copyright Copyright © 2008 Łukasz Garczewski, Wikia Inc.
  * @license GPL-2.0-or-later
  */
-
 class SpecialEditAccount extends SpecialPage {
 
 	/** @var User|null */

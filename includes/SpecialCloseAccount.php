@@ -22,8 +22,6 @@ use Xml;
  * It's easier to have that feature implemented as a special page than fixing
  * the broken-by-design logic.
  *
- * @file
- * @date 27 February 2015
  * @see https://bugzilla.shoutwiki.com/show_bug.cgi?id=294
  */
 class SpecialCloseAccount extends SpecialPage {

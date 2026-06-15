@@ -8,10 +8,8 @@
  *
  * See FlagClosedAccounts.php.
  *
- * @file
  * @ingroup Maintenance
  * @author Jack Phoenix <jack@shoutwiki.com>
- * @date 11 April 2014
  */
 
 /**
