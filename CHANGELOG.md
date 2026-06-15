@@ -6,12 +6,16 @@ This project adheres to [Semantic Versioning](https://semver.org/) and
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-06-15
+
+Adds password policy enforcement and user name autocomplete to the select-user form.
+
 ### Added
-- Enforce MediaWiki password policy (`$wgPasswordPolicy`) when setting a password via EditAccount; policy violations are now rejected with a descriptive error message instead of being silently accepted
-- User name autocomplete in the select-user form, matching the behaviour of Special:UserRights
+- Enforce MediaWiki password policy (`$wgPasswordPolicy`) when setting a password via EditAccount; policy violations are now rejected with a descriptive error message instead of being silently accepted [`bd24611`](https://github.com/gesinn-it-pub/EditAccount/commit/bd24611)
+- User name autocomplete in the select-user form, matching the behaviour of Special:UserRights [`bdc4616`](https://github.com/gesinn-it-pub/EditAccount/commit/bdc4616)
 
 ### Fixed
-- Escape unquoted double quote in `editaccount-usage-close` message in `de` and `de-formal` translations, which caused JSON parse errors
+- Escape unquoted double quote in `editaccount-usage-close` message in `de` and `de-formal` translations, which caused JSON parse errors [`7c45c68`](https://github.com/gesinn-it-pub/EditAccount/commit/7c45c68)
 
 ## [3.0.1] - 2026-06-15
 
@@ -48,6 +52,7 @@ random token generation.
 - Update i18n messages to use sitename [`50cea4d`](https://github.com/gesinn-it-pub/EditAccount/commit/50cea4d)
 - Add README with Codecov badge, description, installation and usage [`3e7b510`](https://github.com/gesinn-it-pub/EditAccount/commit/3e7b510)
 
-[Unreleased]: https://github.com/gesinn-it-pub/EditAccount/compare/3.0.1...HEAD
+[Unreleased]: https://github.com/gesinn-it-pub/EditAccount/compare/3.1.0...HEAD
+[3.1.0]: https://github.com/gesinn-it-pub/EditAccount/compare/3.0.1...3.1.0
 [3.0.1]: https://github.com/gesinn-it-pub/EditAccount/compare/3.0.0...3.0.1
 [3.0.0]: https://github.com/gesinn-it-pub/EditAccount/releases/tag/3.0.0
