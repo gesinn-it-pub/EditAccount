@@ -283,13 +283,9 @@ class User {
 	 * @return string
 	 */
 	public function generateRandomScrambledPassword(): string {
-		// Password requirements need a capital letter, a digit, and a lowercase letter.
-		// wfGenerateToken() returns a 32 char hex string, which will almost
-		// always satisfy the digit/letter but not always.
-		// This suffix shouldn't reduce the entropy of the intentionally
-		// scrambled password.
-		$REQUIRED_CHARS = 'A1a';
-		return ( self::generateToken() . $REQUIRED_CHARS );
+		// Append fixed chars to satisfy any policy requiring uppercase, digit, lowercase.
+		// This does not reduce entropy of the 32-char hex prefix.
+		return self::generateToken() . 'A1a';
 	}
 
 	/**
@@ -400,15 +396,10 @@ class User {
 	}
 
 	/**
-	 * Copypasta from pre-1.23 /includes/GlobalFunctions.php
-	 * @see https://phabricator.wikimedia.org/rMW118567a4ba0ded669f43a58713733cab915afe39
-	 *
-	 * @param string $salt
-	 * @return string
+	 * @return string 32-character cryptographically secure hex string
 	 */
-	public static function generateToken( string $salt = '' ): string {
-		$salt = serialize( $salt );
-		return md5( mt_rand( 0, 0x7fffffff ) . $salt );
+	public static function generateToken(): string {
+		return bin2hex( random_bytes( 16 ) );
 	}
 
 	// methods for CloseAccount feature

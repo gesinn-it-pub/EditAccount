@@ -152,6 +152,26 @@ class UserTest extends TestCase {
         $this->assertTrue( $this->checkFunction, 'Function toggleAdopterStatus() returns false, check everything once again!' );
     }
 
+    public function testGenerateTokenReturns32CharHexString() {
+        $token = User::generateToken();
+        $this->assertSame( 32, strlen( $token ) );
+        $this->assertRegExp( '/^[0-9a-f]{32}$/', $token );
+    }
+
+    public function testGenerateTokenIsUnique() {
+        $this->assertNotSame( User::generateToken(), User::generateToken() );
+    }
+
+    public function testGenerateRandomScrambledPasswordEndsWithRequiredChars() {
+        $password = $this->userToEdit->generateRandomScrambledPassword();
+        $this->assertStringEndsWith( 'A1a', $password );
+    }
+
+    public function testGenerateRandomScrambledPasswordHasMinimumLength() {
+        $password = $this->userToEdit->generateRandomScrambledPassword();
+        $this->assertGreaterThanOrEqual( 35, strlen( $password ) );
+    }
+
     public function testCloseUserAccount() {
         $this->closeAccount = new Close( $this->userGroupManager, $this->userNameUtils, $this->userManager, $this->passFactory );
 
