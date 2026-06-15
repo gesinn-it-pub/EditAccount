@@ -208,7 +208,7 @@ class UserTest extends TestCase {
     public function testGenerateTokenReturns32CharHexString() {
         $token = User::generateToken();
         $this->assertSame( 32, strlen( $token ) );
-        $this->assertRegExp( '/^[0-9a-f]{32}$/', $token );
+        $this->assertMatchesRegularExpression( '/^[0-9a-f]{32}$/', $token );
     }
 
     public function testGenerateTokenIsUnique() {
