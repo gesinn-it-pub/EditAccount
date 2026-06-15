@@ -3,7 +3,6 @@
 declare( strict_types=1 );
 
 use MediaWiki\Extension\EditAccount\SpecialEditAccount;
-use MediaWiki\Request\FauxRequest;
 
 /**
  * @group Integration
@@ -34,7 +33,7 @@ class SpecialEditAccountTest extends SpecialPageTestBase {
 		$page = $this->newSpecialPage();
 
 		$context = new \DerivativeContext( \RequestContext::getMain() );
-		$context->setRequest( new FauxRequest() );
+		$context->setRequest( new \FauxRequest() );
 		$context->setAuthority( $unprivileged );
 		$page->setContext( $context );
 
@@ -46,7 +45,7 @@ class SpecialEditAccountTest extends SpecialPageTestBase {
 	}
 
 	public function testPrivilegedUserSeesSelectUserFormWithNoSubpage(): void {
-		[ $html ] = $this->executeSpecialPage( '', new FauxRequest(), null, $this->getPrivilegedUser() );
+		[ $html ] = $this->executeSpecialPage( '', new \FauxRequest(), null, $this->getPrivilegedUser() );
 		$this->assertStringContainsString( 'edit-account-select-form', $html );
 		$this->assertStringContainsString( 'wpUserName', $html );
 	}
@@ -54,7 +53,7 @@ class SpecialEditAccountTest extends SpecialPageTestBase {
 	public function testSelectUserFormIsShownForUnknownUser(): void {
 		[ $html ] = $this->executeSpecialPage(
 			'',
-			new FauxRequest( [ 'wpUserName' => 'NonExistentUser12345xyz' ] ),
+			new \FauxRequest( [ 'wpUserName' => 'NonExistentUser12345xyz' ] ),
 			null,
 			$this->getPrivilegedUser()
 		);
@@ -66,7 +65,7 @@ class SpecialEditAccountTest extends SpecialPageTestBase {
 		$testUser = $this->getMutableTestUser()->getUser();
 		[ $html ] = $this->executeSpecialPage(
 			'',
-			new FauxRequest( [ 'wpUserName' => $testUser->getName() ] ),
+			new \FauxRequest( [ 'wpUserName' => $testUser->getName() ] ),
 			null,
 			$this->getPrivilegedUser()
 		);
@@ -78,7 +77,7 @@ class SpecialEditAccountTest extends SpecialPageTestBase {
 		$testUser = $this->getMutableTestUser()->getUser();
 		[ $html ] = $this->executeSpecialPage(
 			$testUser->getName(),
-			new FauxRequest(),
+			new \FauxRequest(),
 			null,
 			$this->getPrivilegedUser()
 		);
@@ -89,7 +88,7 @@ class SpecialEditAccountTest extends SpecialPageTestBase {
 		$testUser = $this->getMutableTestUser()->getUser();
 		[ $html ] = $this->executeSpecialPage(
 			'',
-			new FauxRequest( [
+			new \FauxRequest( [
 				'wpUserName' => $testUser->getName(),
 				'wpAction'   => 'setemail',
 				'wpNewEmail' => 'newemail@example.com',
@@ -104,7 +103,7 @@ class SpecialEditAccountTest extends SpecialPageTestBase {
 		$testUser = $this->getMutableTestUser()->getUser();
 		[ $html ] = $this->executeSpecialPage(
 			'',
-			new FauxRequest( [
+			new \FauxRequest( [
 				'wpUserName' => $testUser->getName(),
 				'wpAction'   => 'setemail',
 				'wpNewEmail' => 'not-a-valid-email',
@@ -119,7 +118,7 @@ class SpecialEditAccountTest extends SpecialPageTestBase {
 		$testUser = $this->getMutableTestUser()->getUser();
 		[ $html ] = $this->executeSpecialPage(
 			'',
-			new FauxRequest( [
+			new \FauxRequest( [
 				'wpUserName' => $testUser->getName(),
 				'wpAction'   => 'setemail',
 				'wpNewEmail' => '',
@@ -134,7 +133,7 @@ class SpecialEditAccountTest extends SpecialPageTestBase {
 		$testUser = $this->getMutableTestUser()->getUser();
 		[ $html ] = $this->executeSpecialPage(
 			'',
-			new FauxRequest( [
+			new \FauxRequest( [
 				'wpUserName' => $testUser->getName(),
 				'wpAction'   => 'setpass',
 				'wpNewPass'  => 'NewPass#123!Aa',
@@ -149,7 +148,7 @@ class SpecialEditAccountTest extends SpecialPageTestBase {
 		$testUser = $this->getMutableTestUser()->getUser();
 		[ $html ] = $this->executeSpecialPage(
 			'',
-			new FauxRequest( [
+			new \FauxRequest( [
 				'wpUserName'    => $testUser->getName(),
 				'wpAction'      => 'setrealname',
 				'wpNewRealName' => 'Test Real Name',
@@ -164,7 +163,7 @@ class SpecialEditAccountTest extends SpecialPageTestBase {
 		$testUser = $this->getMutableTestUser()->getUser();
 		[ $html ] = $this->executeSpecialPage(
 			'',
-			new FauxRequest( [
+			new \FauxRequest( [
 				'wpUserName' => $testUser->getName(),
 				'wpAction'   => 'closeaccount',
 			], true ),

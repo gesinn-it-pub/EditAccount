@@ -3,7 +3,6 @@
 declare( strict_types=1 );
 
 use MediaWiki\Extension\EditAccount\SpecialCloseAccount;
-use MediaWiki\Request\FauxRequest;
 
 /**
  * @group Integration
@@ -26,7 +25,7 @@ class SpecialCloseAccountTest extends SpecialPageTestBase {
 
 	public function testAnonymousUserThrowsPermissionsError(): void {
 		$this->expectException( \PermissionsError::class );
-		$this->executeSpecialPage( '', new FauxRequest() );
+		$this->executeSpecialPage( '', new \FauxRequest() );
 	}
 
 	public function testGetGroupNameReturnsUsers(): void {
@@ -37,7 +36,7 @@ class SpecialCloseAccountTest extends SpecialPageTestBase {
 		$page = $this->newSpecialPage();
 
 		$context = new \DerivativeContext( \RequestContext::getMain() );
-		$context->setRequest( new FauxRequest() );
+		$context->setRequest( new \FauxRequest() );
 		$context->setUser( $this->getMutableTestUser()->getUser() );
 		$page->setContext( $context );
 
@@ -51,7 +50,7 @@ class SpecialCloseAccountTest extends SpecialPageTestBase {
 		$page = $this->newSpecialPage();
 
 		$context = new \DerivativeContext( \RequestContext::getMain() );
-		$context->setRequest( new FauxRequest() );
+		$context->setRequest( new \FauxRequest() );
 		$context->setAuthority( $staff );
 		$page->setContext( $context );
 
@@ -67,7 +66,7 @@ class SpecialCloseAccountTest extends SpecialPageTestBase {
 		$page = $this->newSpecialPage();
 
 		$context = new \DerivativeContext( \RequestContext::getMain() );
-		$context->setRequest( new FauxRequest() );
+		$context->setRequest( new \FauxRequest() );
 		$context->setUser( $staff );
 		$page->setContext( $context );
 
@@ -79,7 +78,7 @@ class SpecialCloseAccountTest extends SpecialPageTestBase {
 		$page = $this->newSpecialPage();
 
 		$context = new \DerivativeContext( \RequestContext::getMain() );
-		$context->setRequest( new FauxRequest() );
+		$context->setRequest( new \FauxRequest() );
 		$context->setUser( $user );
 		$page->setContext( $context );
 
@@ -90,7 +89,7 @@ class SpecialCloseAccountTest extends SpecialPageTestBase {
 		$page = $this->newSpecialPage();
 
 		$context = new \DerivativeContext( \RequestContext::getMain() );
-		$context->setRequest( new FauxRequest() );
+		$context->setRequest( new \FauxRequest() );
 		$context->setUser( \User::newFromId( 0 ) );
 		$page->setContext( $context );
 
@@ -99,7 +98,7 @@ class SpecialCloseAccountTest extends SpecialPageTestBase {
 
 	public function testGetRequestShowsCloseAccountForm(): void {
 		$user = $this->getMutableTestUser()->getAuthority();
-		[ $html ] = $this->executeSpecialPage( '', new FauxRequest(), null, $user );
+		[ $html ] = $this->executeSpecialPage( '', new \FauxRequest(), null, $user );
 		$this->assertStringContainsString( 'editaccountSelectForm', $html );
 	}
 
@@ -107,7 +106,7 @@ class SpecialCloseAccountTest extends SpecialPageTestBase {
 		$user = $this->getMutableTestUser()->getAuthority();
 		[ $html ] = $this->executeSpecialPage(
 			'',
-			new FauxRequest( [ 'wpReason' => '' ], true ),
+			new \FauxRequest( [ 'wpReason' => '' ], true ),
 			null,
 			$user
 		);
