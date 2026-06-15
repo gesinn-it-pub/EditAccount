@@ -15,9 +15,6 @@ class User {
 	private ?UserAccount $mUser;
 
 	/** @var UserAccount|null */
-	private ?UserAccount $mTempUser;
-
-	/** @var UserAccount|null */
 	private ?UserAccount $user;
 
 	/** @var ILoadBalancer */
@@ -28,13 +25,11 @@ class User {
 
 	public function __construct(
 		UserAccount $mUser,
-		UserAccount $mTempUser,
 		UserAccount $user,
 		ILoadBalancer $loadBalancer,
 		UserFactory $userFactory
 	) {
 		$this->mUser = $mUser;
-		$this->mTempUser = $mTempUser;
 		$this->user = $user;
 		$this->loadBalancer = $loadBalancer;
 		$this->userFactory = $userFactory;
@@ -50,15 +45,6 @@ class User {
 	}
 
 	/**
-	 * Get temporary user who is going to be assigned as User
-	 *
-	 * @return User
-	 */
-	public function getTempUser() {
-		return $this->mTempUser;
-	}
-
-	/**
 	 * Get User who is logged in to the system
 	 *
 	 * @return User
@@ -69,38 +55,25 @@ class User {
 
 	// methods for EditAccount feature
 
-    /**
+	/**
 	 * Set a user's e-mail
 	 *
 	 * @param string $email E-mail address to set to the user
 	 * @param UserAccount $mUser
-	 * @param UserAccount $mTempUser
 	 * @param UserManager $userOptionsManager
 	 * @param UserAccount $user
 	 * @param string $changeReason Reason for change
 	 * @return bool True on success, false on failure (i.e. if we were given an invalid email address)
 	 */
-	public function setEmail( string $email, UserAccount $mUser, UserAccount $mTempUser, UserManager $userOptionsManager, UserAccount $user, string $changeReason = '' ): bool {
-		if ( $mTempUser->mName || $mTempUser->mId ) {
-			if ( $email == '' ) {
-				return false;
-			} else {
-				$mTempUser->setEmail( $email );
-				$mUser = $mTempUser->activateUser( $mUser );
-
-				// reset temp user after activating the user
-				$mTempUser = null;
-			}
+	public function setEmail( string $email, UserAccount $mUser, UserManager $userOptionsManager, UserAccount $user, string $changeReason = '' ): bool {
+		$mUser->setEmail( $email );
+		if ( $email != '' ) {
+			$mUser->confirmEmail();
+			$userOptionsManager->setOption( $mUser, 'new_email', null );
 		} else {
-				$mUser->setEmail( $email );
-			if ( $email != '' ) {
-				$mUser->confirmEmail();
-				$userOptionsManager->setOption( $mUser, 'new_email', null );
-			} else {
-				$mUser->invalidateEmail();
-			}
-				$mUser->saveSettings();
+			$mUser->invalidateEmail();
 		}
+		$mUser->saveSettings();
 
 		// Check if everything went through OK, just in case
 		if ( $mUser->getEmail() == $email ) {
@@ -108,7 +81,6 @@ class User {
 			$logEntry = new LogEntry( 'editaccnt', 'mailchange' );
 			$logEntry->setPerformer( $user );
 			$logEntry->setTarget( $mUser->getUserPage() );
-			// JP 13 April 2013: not sure if this is the correct one, CHECKME
 			$logEntry->setComment( $changeReason );
 			$logEntry->insert();
 
@@ -123,29 +95,19 @@ class User {
 	 *
 	 * @param mixed $pass Password to set to the user
 	 * @param UserAccount $mUser
-	 * @param UserAccount $mTempUser
 	 * @param PassFactory $passFactory
 	 * @param UserAccount $user
 	 * @param string $changeReason Reason for change
 	 * @return bool True on success, false on failure
 	 */
-	public function setPassword( $pass, UserAccount $mUser, UserAccount $mTempUser, PassFactory $passFactory, UserAccount $user, string $changeReason = '' ): bool {
+	public function setPassword( $pass, UserAccount $mUser, PassFactory $passFactory, UserAccount $user, string $changeReason = '' ): bool {
 		if ( $this->setPasswordForUser( $mUser, $pass, $passFactory ) ) {
-			// Save the new settings
-			if ( $mTempUser->mName || $mTempUser->mId ) {
-				$this->setPasswordForUser( $mTempUser, $pass, $passFactory );
-				$mTempUser->updateData();
-				$mTempUser->saveSettingsTempUserToUser( $mUser );
-				$mUser->mName = $mTempUser->getName();
-			} else {
-				$mUser->saveSettings();
-			}
+			$mUser->saveSettings();
 
 			// Log what was done
 			$logEntry = new LogEntry( 'editaccnt', 'passchange' );
 			$logEntry->setPerformer( $user );
 			$logEntry->setTarget( $mUser->getUserPage() );
-			// JP 13 April 2013: not sure if this is the correct one, CHECKME
 			$logEntry->setComment( $changeReason );
 			$logEntry->insert();
 
@@ -166,7 +128,6 @@ class User {
 	public function setPasswordForUser( UserAccount $mUser, string $password, PassFactory $passFactory ): bool {
 		if ( !$mUser->getId() ) {
 			return false;
-			// throw new MWException( "Passed User has not been added to the database yet!" );
 		}
 
 		$dbw = $this->loadBalancer->getConnection( DB_PRIMARY );
@@ -178,7 +139,6 @@ class User {
 		);
 		if ( !$row ) {
 			return false;
-			// throw new MWException( "Passed User has an ID but is not in the database?" );
 		}
 
 		$passwordHash = $passFactory->newFromPlaintext( $password );
@@ -205,14 +165,11 @@ class User {
 		$mUser->setRealName( $realName );
 		$mUser->saveSettings();
 
-		// Was the change saved successfully? The setRealName function doesn't
-		// return a boolean value...
 		if ( $mUser->getRealName() == $realName ) {
 			// Log what was done
 			$logEntry = new LogEntry( 'editaccnt', 'realnamechange' );
 			$logEntry->setPerformer( $user );
 			$logEntry->setTarget( $mUser->getUserPage() );
-			// JP 13 April 2013: not sure if this is the correct one, CHECKME
 			$logEntry->setComment( $changeReason );
 			$logEntry->insert();
 
@@ -259,14 +216,9 @@ class User {
 		$mUser = $this->userFactory->newFromId( $id );
 
 		if ( $mUser->getEmail() == '' ) {
-			// ShoutWiki patch begin
-			$this->setDisabled();
-			// ShoutWiki patch end
-			// Mark as disabled in a more real way, that doesn't depend on the real_name text
+			// Mark as disabled
 			$userOptionsManager->setOption( $mUser, 'disabled', 1 );
 			$userOptionsManager->setOption( $mUser, 'disabled_date', wfTimestamp( TS_DB ) );
-			// BugId:18085 - setting a new token causes the user to be logged out.
-			$mUser->setToken( md5( microtime() . mt_rand( 0, 0x7fffffff ) ) );
 
 			// BugID:95369 This forces saveSettings() to commit the transaction
 			// FIXME: this is a total hack, we should add a commit=true flag to saveSettings
@@ -279,7 +231,6 @@ class User {
 			$logEntry = new LogEntry( 'editaccnt', 'closeaccnt' );
 			$logEntry->setPerformer( $user );
 			$logEntry->setTarget( $mUser->getUserPage() );
-			// JP 13 April 2013: not sure if this is the correct one, CHECKME
 			$logEntry->setComment( $changeReason );
 			$logEntry->insert();
 
@@ -299,38 +250,6 @@ class User {
 		// Append fixed chars to satisfy any policy requiring uppercase, digit, lowercase.
 		// This does not reduce entropy of the 32-char hex prefix.
 		return self::generateToken() . 'A1a';
-	}
-
-	/**
-	 * Marks the account as disabled, the ShoutWiki way.
-	 */
-	public function setDisabled() {
-		if ( !class_exists( 'GlobalPreferences' ) ) {
-			error_log( 'Cannot use the GlobalPreferences class in ' . __METHOD__ );
-			return;
-		}
-		$dbw = GlobalPreferences::getPrefsDB( DB_PRIMARY );
-
-		$dbw->startAtomic( __METHOD__ );
-		$dbw->insert(
-			'global_preferences',
-			[
-				'gp_property' => 'disabled',
-				'gp_value' => 1,
-				'gp_user' => $this->mUser->getId()
-			],
-			__METHOD__
-		);
-		$dbw->insert(
-			'global_preferences',
-			[
-				'gp_property' => 'disabled_date',
-				'gp_value' => wfTimestamp( TS_DB ),
-				'gp_user' => $this->mUser->getId()
-			],
-			__METHOD__
-		);
-		$dbw->endAtomic( __METHOD__ );
 	}
 
 	/**
@@ -356,36 +275,6 @@ class User {
 		$userOptionsManager->setOption( $mUser, 'disabled', null );
 		$userOptionsManager->setOption( $mUser, 'disabled_date', null );
 		$userOptionsManager->saveOptions( $mUser );
-
-		// ShoutWiki patch begin
-		// We also need to clear GlobalPreferences data; otherwise it's possible
-		// (though unlikely) that a staff member reactivates a disabled account
-		// but the "this account has been disabled" notice on Special:Contributions
-		// won't go away.
-		if ( class_exists( 'GlobalPreferences' ) ) {
-			$dbw = GlobalPreferences::getPrefsDB( DB_PRIMARY );
-
-			$dbw->startAtomic( __METHOD__ );
-			$dbw->delete(
-				'global_preferences',
-				[
-					'gp_property' => 'disabled',
-					'gp_value' => 1,
-					'gp_user' => $mUser->getId()
-				],
-				__METHOD__
-			);
-			$dbw->delete(
-				'global_preferences',
-				[
-					'gp_property' => 'disabled_date',
-					'gp_user' => $mUser->getId()
-				],
-				__METHOD__
-			);
-			$dbw->endAtomic( __METHOD__ );
-		}
-		// ShoutWiki patch end
 
 		return true;
 	}
@@ -440,18 +329,6 @@ class User {
 			$mUser->setRealName( '' );
 		}
 
-		if ( class_exists( 'Masthead' ) ) {
-			// Wikia's avatar extension
-			$avatar = Masthead::newFromUser( $mUser );
-			if ( !$avatar->isDefault() ) {
-				if ( !$avatar->removeFile( false ) ) {
-					// don't quit here, since the avatar is a non-critical part
-					// of closing, but flag for later
-					$this->mStatusMsg2 = $this->msg( 'editaccount-remove-avatar-fail' )->plain();
-				}
-			}
-		}
-
 		// Remove e-mail address and password
 		$mUser->setEmail( '' );
 		$newPass = $this->generateRandomScrambledPassword();
@@ -466,14 +343,9 @@ class User {
 		$mUser = $this->userFactory->newFromId( $id );
 
 		if ( $mUser->getEmail() == '' ) {
-			// ShoutWiki patch begin
-			$this->setDisabled();
-			// ShoutWiki patch end
-			// Mark as disabled in a more real way, that doesn't depend on the real_name text
+			// Mark as disabled
 			$userOptionsManager->setOption( $mUser, 'disabled', 1 );
 			$userOptionsManager->setOption( $mUser, 'disabled_date', wfTimestamp( TS_DB ) );
-			// BugId:18085 - setting a new token causes the user to be logged out.
-			$mUser->setToken( md5( microtime() . mt_rand( 0, 0x7fffffff ) ) );
 
 			// BugID:95369 This forces saveSettings() to commit the transaction
 			// FIXME: this is a total hack, we should add a commit=true flag to saveSettings
@@ -486,37 +358,12 @@ class User {
 			$logEntry = new LogEntry( 'editaccnt', 'closeaccnt' );
 			$logEntry->setPerformer( $mUser );
 			$logEntry->setTarget( $mUser->getUserPage() );
-			// JP 13 April 2013: not sure if this is the correct one, CHECKME
 			$logEntry->setComment( $changeReason );
 			$logEntry->insert();
 
-			// All clear!
-			//$this->mStatusMsg = $this->msg( 'editaccount-success-close', $mUser->mName )->text();
 			return true;
 		} else {
-			// There were errors...inform the user about those
-			//$this->mStatusMsg = $this->msg( 'editaccount-error-close', $mUser->mName )->text();
 			return false;
-		}
-	}
-
-	/**
-	 * Check if Masterhead class exists
-	 *
-	 * @return bool True on success, false on failure
-	 */
-	public function checkMasterClass( UserAccount $mUser ) {
-		if ( class_exists( 'Masthead' ) ) {
-			// Wikia's avatar extension
-			$avatar = Masthead::newFromUser( $mUser );
-			if ( !$avatar->isDefault() ) {
-				if ( !$avatar->removeFile( false ) ) {
-					// don't quit here, since the avatar is a non-critical part
-					// of closing, but flag for later
-
-					return true;
-				}
-			}
 		}
 	}
 }

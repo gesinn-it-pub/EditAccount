@@ -36,10 +36,6 @@ class SpecialEditAccount extends SpecialPage {
 	public ?string $mStatusMsg = null;
 	/** @var string|null */
 	public ?string $mStatusMsg2 = null;
-	/** @var User|null */
-	public ?User $mTempUser = null;
-	/** @var User|null */
-	public ?User $tmpUser = null;
 	/** @var UserToEdit|null */
 	public ?UserToEdit $userToEdit = null;
 
@@ -171,32 +167,15 @@ class SpecialEditAccount extends SpecialPage {
 				}
 
 				if ( !$id ) {
-					// Wikia stuff...
-					if ( class_exists( 'TempUser' ) ) {
-						$this->mTempUser = TempUser::getTempUserFromName( $userName );
-					}
-
-					if ( $this->mTempUser ) {
-						$id = $this->mTempUser->getId();
-						$this->mUser = $this->userFactory->newFromId( $id );
-					} else {
-						$this->mStatus = false;
-						$this->mStatusMsg = $this->msg( 'editaccount-nouser', $userName )->text();
-						$action = '';
-					}
+					$this->mStatus = false;
+					$this->mStatusMsg = $this->msg( 'editaccount-nouser', $userName )->text();
+					$action = '';
 				}
 
-				if ( $this->mTempUser == null ) {
-					$tmpUser = new User();
-					// create an object of User class with reference on mUser who is going to be edited
-					$userToEdit = new UserToEdit( $this->mUser, $tmpUser, $user, $this->loadBalancer, $this->userFactory );
-				} else {
-					// create an object of User class with reference on mUser who is going to be edited
-					$userToEdit = new UserToEdit( $this->mUser, $this->mTempUser, $user, $this->loadBalancer, $this->userFactory );
-				}
+				// create an object of User class with reference on mUser who is going to be edited
+				$userToEdit = new UserToEdit( $this->mUser, $user, $this->loadBalancer, $this->userFactory );
 
 				$mUser = $userToEdit->getUserToEdit();
-				$tmpUser = $userToEdit->getTempUser();
 				$loggedUser = $userToEdit->getLoggedUser();
 			}
 		}
@@ -213,7 +192,7 @@ class SpecialEditAccount extends SpecialPage {
 			case 'setemail':
 				$newEmail = $request->getVal( 'wpNewEmail' );
 				if ( Sanitizer::validateEmail( $newEmail ) || $newEmail == '' ) {
-					$isEmailSet = $userToEdit->setEmail( $newEmail, $mUser, $tmpUser, $this->userOptionsManager, $loggedUser, $changeReason );
+					$isEmailSet = $userToEdit->setEmail( $newEmail, $mUser, $this->userOptionsManager, $loggedUser, $changeReason );
 					if ( $mUser->getEmail() == $newEmail ) {
 						if ( $isEmailSet !== false ) {
 							if ( $newEmail == '' ) {
@@ -236,7 +215,7 @@ class SpecialEditAccount extends SpecialPage {
 				break;
 			case 'setpass':
 				$newPass = $request->getVal( 'wpNewPass' );
-				$isPassSet = $userToEdit->setPassword( $newPass, $mUser, $tmpUser, $this->passwordFactory, $loggedUser, $changeReason );
+				$isPassSet = $userToEdit->setPassword( $newPass, $mUser, $this->passwordFactory, $loggedUser, $changeReason );
 				if ( $isPassSet ) {
 					$this->mStatusMsg = $this->msg( 'editaccount-success-pass', $mUser->mName )->text();
 					$this->mStatus = $this->mStatusMsg;
@@ -270,11 +249,6 @@ class SpecialEditAccount extends SpecialPage {
 			case 'closeaccountconfirm':
 				$closeAccount = $userToEdit->closeAccount( $mUser, $loggedUser, $this->passwordFactory, $this->userOptionsManager, $this, $changeReason );
 				if ( $closeAccount ) {
-					$checkMasterClassAvatar = $userToEdit->checkMasterClass( $mUser );
-					if ( $checkMasterClassAvatar ) {
-						$this->mStatusMsg2 = $this->msg( 'editaccount-remove-avatar-fail' )->plain();
-						$this->mStatus = $this->mStatusMsg2;
-					}
 					$this->mStatusMsg = $this->msg( 'editaccount-success-close', $mUser->mName )->text();
 					$this->mStatus = $this->mStatusMsg;
 				} else {
@@ -350,13 +324,7 @@ class SpecialEditAccount extends SpecialPage {
 		}
 
 		if ( is_object( $this->mUser ) ) {
-			if ( $this->mTempUser ) {
-				$this->mUser = $this->mTempUser->mapTempUserToUser( false );
-				$userStatus = $this->msg( 'editaccount-status-tempuser' )->plain();
-				$tmpl->set( 'disabled', 'disabled="disabled"' );
-			} else {
-				$userStatus = $this->msg( 'editaccount-status-realuser' )->plain();
-			}
+			$userStatus = $this->msg( 'editaccount-status-realuser' )->plain();
 			$this->mUser->load();
 
 			// get new e-mail (unconfirmed)
@@ -398,28 +366,4 @@ class SpecialEditAccount extends SpecialPage {
 		$out->addModules( "ext.editAccount.displayuser" );
 	}
 
-	/**
-	 * Is the given user account disabled?
-	 *
-	 * @param User $user
-	 * @return bool|void True if it is disabled, otherwise false
-	 */
-	public static function isAccountDisabled( User $user ) {
-		if ( !class_exists( 'GlobalPreferences' ) ) {
-			error_log( 'Cannot use the GlobalPreferences class in ' . __METHOD__ );
-			return;
-		}
-		$dbr = GlobalPreferences::getPrefsDB();
-		$retVal = $dbr->selectField(
-			'global_preferences',
-			'gp_value',
-			[
-				'gp_property' => 'disabled',
-				'gp_user' => $user->getId()
-			],
-			__METHOD__
-		);
-
-		return (bool)$retVal;
-	}
 }

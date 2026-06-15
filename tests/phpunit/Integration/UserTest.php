@@ -30,7 +30,6 @@ use Wikimedia\Rdbms\ILoadBalancer;
 class UserIntegrationTest extends MediaWikiIntegrationTestCase {
 
     private UserAccount $mUser;
-    private UserAccount $mTempUser;
     private UserAccount $user;
     private UserManager $userManager;
     private PassFactory $passFactory;
@@ -49,13 +48,6 @@ class UserIntegrationTest extends MediaWikiIntegrationTestCase {
         parent::setUp();
 
         $this->userManager = $this->getMockBuilder( UserManager::class )
-            ->disableOriginalConstructor()
-            ->disableOriginalClone()
-            ->disableArgumentCloning()
-            ->disallowMockingUnknownTypes()
-            ->getMock();
-
-        $this->mTempUser = $this->getMockBuilder( UserAccount::class )
             ->disableOriginalConstructor()
             ->disableOriginalClone()
             ->disableArgumentCloning()
@@ -123,7 +115,7 @@ class UserIntegrationTest extends MediaWikiIntegrationTestCase {
         $this->userFactory->method( 'newFromId' )->willReturn( $this->mUser );
 
         $this->passFactory = new PassFactory();
-        $this->userToEdit = new User( $this->mUser, $this->mTempUser, $this->user, $this->loadBalancer, $this->userFactory );
+        $this->userToEdit = new User( $this->mUser, $this->user, $this->loadBalancer, $this->userFactory );
     }
 
     protected function tearDown(): void {
@@ -135,7 +127,6 @@ class UserIntegrationTest extends MediaWikiIntegrationTestCase {
         unset( $this->userIdentityLookup );
         unset( $this->linkRenderer );
         unset( $this->passFactory );
-        unset( $this->mTempUser );
         unset( $this->user );
         unset( $this->mUser );
         unset( $this->userToEdit );
@@ -150,7 +141,7 @@ class UserIntegrationTest extends MediaWikiIntegrationTestCase {
         $this->mUser->setName( $name );
         $this->mUser->setEmail( $oldEmail );
 
-        $this->checkFunction = $this->userToEdit->setEmail( $newEmail, $this->mUser, $this->mTempUser, $this->userManager, $this->user, $this->changeReason );
+        $this->checkFunction = $this->userToEdit->setEmail( $newEmail, $this->mUser, $this->userManager, $this->user, $this->changeReason );
         $this->assertTrue( $this->checkFunction, 'Function setEmail() returns false, check everything once again!' );
     }
 
@@ -192,7 +183,7 @@ class UserIntegrationTest extends MediaWikiIntegrationTestCase {
     }
 
     public function testSetPassword() {
-        $this->checkFunction = $this->userToEdit->setPassword( $this->password, $this->mUser, $this->mTempUser, $this->passFactory, $this->user, $this->changeReason );
+        $this->checkFunction = $this->userToEdit->setPassword( $this->password, $this->mUser, $this->passFactory, $this->user, $this->changeReason );
         $this->assertTrue( $this->checkFunction, 'Function setPassword() returns false, check everything once again!' );
     }
 

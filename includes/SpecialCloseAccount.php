@@ -30,8 +30,6 @@ class SpecialCloseAccount extends SpecialPage {
 
 	/** @var User|null */
 	public ?User $mUser = null;
-	/** @var User|null */
-	public ?User $mTempUser = null;
 	/** @var bool|null */
 	private ?bool $mStatus = null;
 	/** @var string|null */
@@ -164,14 +162,8 @@ class SpecialCloseAccount extends SpecialPage {
 			$this->mUser = $this->userFactory->newFromName( $userName );
 		}
 
-		if ( $this->mTempUser == null ) {
-			$tmpUser = new User();
-			// create an object of User class with reference on mUser who is going to be deactivated
-			$userToDeactivate = new ExtUser( $this->mUser, $tmpUser, $user, $this->loadBalancer, $this->userFactory );
-		} else {
-			// create an object of User class with reference on mUser who is going to be deactivated
-			$userToDeactivate = new ExtUser( $this->mUser, $this->mTempUser, $user, $this->loadBalancer, $this->userFactory );
-		}
+		// create an object of User class with reference on mUser who is going to be deactivated
+		$userToDeactivate = new ExtUser( $this->mUser, $user, $this->loadBalancer, $this->userFactory );
 
 		$mUser = $userToDeactivate->getUserToEdit();
 
@@ -180,11 +172,6 @@ class SpecialCloseAccount extends SpecialPage {
 		if ( $request->wasPosted() ) {
 			$isAccountDeactivated = $userToDeactivate->closeUserAccount( $mUser, $this->passwordFactory, $this->userOptionsManager, $this, $changeReason );
 			if ( $isAccountDeactivated ) {
-				$checkMasterClassAvatar = $userToDeactivate->checkMasterClass( $mUser );
-				if ( $checkMasterClassAvatar ) {
-					$this->mStatusMsg2 = $this->msg( 'editaccount-remove-avatar-fail' )->plain();
-					$this->mStatus = $this->mStatusMsg2;
-				}
 				$this->mStatusMsg = $this->msg( 'editaccount-success-close', $mUser->mName )->text();
 				$this->mStatus = $this->mStatusMsg;
 				$color = 'darkgreen';
