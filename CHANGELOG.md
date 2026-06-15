@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](https://semver.org/) and
 
 ### Added
 - Enforce MediaWiki password policy (`$wgPasswordPolicy`) when setting a password via EditAccount; policy violations are now rejected with a descriptive error message instead of being silently accepted
+- User name autocomplete in the select-user form, matching the behaviour of Special:UserRights
+
+### Fixed
+- Escape unquoted double quote in `editaccount-usage-close` message in `de` and `de-formal` translations, which caused JSON parse errors
 
 ## [3.0.1] - 2026-06-15
 
