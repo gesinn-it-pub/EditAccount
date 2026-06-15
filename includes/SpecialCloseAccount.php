@@ -167,7 +167,7 @@ class SpecialCloseAccount extends SpecialPage {
 
 		$mUser = $userToDeactivate->getUserToEdit();
 
-		$changeReason = $request->getVal( 'wpReason' );
+		$changeReason = $request->getVal( 'wpReason', '' );
 
 		if ( $request->wasPosted() ) {
 			$isAccountDeactivated = $userToDeactivate->closeUserAccount( $mUser, $this->passwordFactory, $this->userOptionsManager, $this, $changeReason );
@@ -189,8 +189,8 @@ class SpecialCloseAccount extends SpecialPage {
 			);
 		} else {
 			// Load the correct template file and initiate a new template object
-			include __DIR__ . '/../templates/closeaccount.tmpl.php';
-			$tmpl = new EditAccountCloseAccountTemplate;
+			include_once __DIR__ . '/../templates/closeaccount.tmpl.php';
+			$tmpl = new \EditAccountCloseAccountTemplate;
 
 			$templateVariables = [
 				// the value of this is irrelevant, it just needs to be defined

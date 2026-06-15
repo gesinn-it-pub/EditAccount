@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\EditAccount;
 
 use MediaWiki\Extension\EditAccount\User as UserToEdit;
 use MediaWiki\Linker\LinkRenderer;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserIdentityLookup;
 use MediaWiki\User\UserNameUtils;
@@ -90,6 +91,17 @@ class SpecialEditAccount extends SpecialPage {
 
 	public function doesWrites(): bool {
 		return true;
+	}
+
+	/**
+	 * Returns true if the given user account has been disabled.
+	 *
+	 * @param User $user
+	 * @return bool
+	 */
+	public static function isAccountDisabled( User $user ): bool {
+		$userOptionsManager = MediaWikiServices::getInstance()->getUserOptionsManager();
+		return (bool)$userOptionsManager->getOption( $user, 'disabled' );
 	}
 
 	/**
@@ -185,7 +197,7 @@ class SpecialEditAccount extends SpecialPage {
 			$action = '';
 		}
 
-		$changeReason = $request->getVal( 'wpReason' );
+		$changeReason = $request->getVal( 'wpReason', '' );
 
 		// What to do, what to show? Hmm...
 		switch ( $action ) {
@@ -209,7 +221,7 @@ class SpecialEditAccount extends SpecialPage {
 					}
 				} else {
 					$this->mStatusMsg = $this->msg( 'editaccount-invalid-email', $newEmail )->text();
-					$this->mStatus = $this->mStatusMsg;
+					$this->mStatus = false;
 				}
 				$template = 'DisplayUser';
 				break;
@@ -290,7 +302,7 @@ class SpecialEditAccount extends SpecialPage {
 
 		// Load the correct template file, build the class name and initiate a
 		// new template object (so that we can set variables later on)
-		include __DIR__ . '/../templates/' . strtolower( $template ) . '.tmpl.php';
+		include_once __DIR__ . '/../templates/' . strtolower( $template ) . '.tmpl.php';
 		$templateClassName = 'EditAccount' . $template . 'Template';
 		$tmpl = new $templateClassName;
 
