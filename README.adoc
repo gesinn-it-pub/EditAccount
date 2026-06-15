@@ -7,5 +7,34 @@
 = {project_name}
 
 image:https://github.com/gesinn-it-pub/EditAccount/actions/workflows/ci.yml/badge.svg[CI,link=https://github.com/gesinn-it-pub/EditAccount/actions/workflows/ci.yml]
+image:https://codecov.io/gh/gesinn-it-pub/EditAccount/branch/master/graph/badge.svg[Codecov,link=https://app.codecov.io/gh/gesinn-it-pub/EditAccount]
 
-TODO: Add project description.
+Enables privileged users to manage user account information directly from the wiki — resetting passwords, changing e-mail addresses, real names, and disabling accounts.
+
+* Website: https://www.mediawiki.org/wiki/Extension:EditAccount
+* License: GPL-2.0-or-later
+
+== Installation
+
+Place the +EditAccount+ directory within your MediaWiki +extensions+ directory, then add the following to +LocalSettings.php+:
+
+[source,php]
+----
+wfLoadExtension( 'EditAccount' );
+----
+
+== Usage
+
+The extension provides two special pages:
+
+* +Special:EditAccount+ — for privileged users (requires the +editaccount+ right); allows searching for any user and editing their e-mail address, password, real name, or disabling their account.
+* +Special:CloseAccount+ — for regular registered users; allows a user to close (disable) their own account.
+
+=== Permissions
+
+The +editaccount+ right is granted to the +staff+ group by default. To grant it to other groups, add the following to +LocalSettings.php+:
+
+[source,php]
+----
+$wgGroupPermissions['sysop']['editaccount'] = true;
+----
