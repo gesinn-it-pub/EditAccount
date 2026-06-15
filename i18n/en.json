@@ -45,6 +45,7 @@
 	"editaccount-success-close": "Disabled account $1.",
 	"editaccount-error-email": "E-mail was not changed. Try again later.",
 	"editaccount-error-pass": "Password was not changed. Try again later.",
+	"editaccount-error-pass-policy": "Password was not changed: $1",
 	"editaccount-error-realname": "Real name was not changed. Try again later.",
 	"editaccount-error-close": "A problem occurred when closing account. Try again later.",
 	"editaccount-invalid-email": "\"$1\" is not a valid e-mail address!",

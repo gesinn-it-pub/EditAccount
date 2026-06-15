@@ -6,6 +6,7 @@ use ManualLogEntry as LogEntry;
 use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserOptionsManager as UserManager;
 use PasswordFactory as PassFactory;
+use Status;
 use User as UserAccount;
 use Wikimedia\Rdbms\ILoadBalancer;
 
@@ -98,9 +99,14 @@ class User {
 	 * @param PassFactory $passFactory
 	 * @param UserAccount $user
 	 * @param string $changeReason Reason for change
-	 * @return bool True on success, false on failure
+	 * @return Status Good on success, fatal with policy errors on failure
 	 */
-	public function setPassword( $pass, UserAccount $mUser, PassFactory $passFactory, UserAccount $user, string $changeReason = '' ): bool {
+	public function setPassword( $pass, UserAccount $mUser, PassFactory $passFactory, UserAccount $user, string $changeReason = '' ): Status {
+		$policyStatus = $mUser->checkPasswordValidity( $pass );
+		if ( !$policyStatus->isGood() ) {
+			return $policyStatus;
+		}
+
 		if ( $this->setPasswordForUser( $mUser, $pass, $passFactory ) ) {
 			$mUser->saveSettings();
 
@@ -111,9 +117,9 @@ class User {
 			$logEntry->setComment( $changeReason );
 			$logEntry->insert();
 
-			return true;
+			return Status::newGood();
 		} else {
-			return false;
+			return Status::newFatal( 'editaccount-error-pass', $mUser->getName() );
 		}
 	}
 

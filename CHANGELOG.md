@@ -6,6 +6,9 @@ This project adheres to [Semantic Versioning](https://semver.org/) and
 
 ## [Unreleased]
 
+### Added
+- Enforce MediaWiki password policy (`$wgPasswordPolicy`) when setting a password via EditAccount; policy violations are now rejected with a descriptive error message instead of being silently accepted
+
 ## [3.0.1] - 2026-06-15
 
 Updates all development dependencies and bumps the CI matrix to PHP 8.3 for MW 1.43.

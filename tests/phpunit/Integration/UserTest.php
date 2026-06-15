@@ -183,8 +183,20 @@ class UserIntegrationTest extends MediaWikiIntegrationTestCase {
     }
 
     public function testSetPassword() {
-        $this->checkFunction = $this->userToEdit->setPassword( $this->password, $this->mUser, $this->passFactory, $this->user, $this->changeReason );
-        $this->assertTrue( $this->checkFunction, 'Function setPassword() returns false, check everything once again!' );
+        $status = $this->userToEdit->setPassword( $this->password, $this->mUser, $this->passFactory, $this->user, $this->changeReason );
+        $this->assertTrue( $status->isGood(), 'setPassword() returned a non-good status for a valid password' );
+    }
+
+    public function testSetPasswordRejectsPasswordViolatingPolicy() {
+        $configKey = defined( 'MediaWiki\MainConfigNames::PasswordPolicy' )
+            ? \MediaWiki\MainConfigNames::PasswordPolicy
+            : 'PasswordPolicy';
+        $existingPolicy = $this->getServiceContainer()->getMainConfig()->get( $configKey );
+        $existingPolicy['policies']['default']['MinimalPasswordLength'] = 100;
+        $this->overrideConfigValue( $configKey, $existingPolicy );
+
+        $status = $this->userToEdit->setPassword( 'short', $this->mUser, $this->passFactory, $this->user, $this->changeReason );
+        $this->assertFalse( $status->isGood(), 'setPassword() should return a non-good status when password violates policy' );
     }
 
     public function testToggleAdopterStatus() {

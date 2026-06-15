@@ -11,6 +11,7 @@
 	"editaccount-warning-close": "<b>Achtung!</b> Sie sind gerade dabei, das Konto von Benutzer <b>$1</b> dauerhaft zu deaktivieren. Dies kann nicht rückgängig gemacht werden. Sind Sie sicher, dass Sie das tun möchten?",
 	"editaccount-error-email": "Die E-Mail-Adresse des Benutzerkontos wurde nicht geändert. Versuchen Sie es bitte erneut oder kontaktieren Sie den Systemadministrator.",
 	"editaccount-error-pass": "Das Passwort des Benutzerkontos wurde nicht geändert. Versuchen Sie es bitte erneut oder kontaktieren Sie den Systemadministrator.",
+	"editaccount-error-pass-policy": "Das Passwort wurde nicht geändert: $1",
 	"editaccount-error-realname": "Der bürgerliche Name des Benutzerkontos wurde nicht geändert. Versuchen Sie es bitte erneut oder kontaktieren Sie den Systemadministrator.",
 	"editaccount-error-close": "Beim Schließen des Benutzerkontos trat ein Problem auf. Versuchen Sie es bitte erneut oder kontaktieren Sie den Systemadministrator.",
 	"editaccount-not-loaded": "Fehler: Die Benutzerdaten konnten nicht ordnungsgemäß geladen werden. Bitte versuchen Sie, die Seite neu zu laden.",

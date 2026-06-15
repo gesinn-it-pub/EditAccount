@@ -52,6 +52,7 @@
 	"editaccount-success-close": "Das Benutzerkonto $1 wurde erfolgreich deaktiviert.",
 	"editaccount-error-email": "Die E-Mail-Adresse des Benutzerkontos wurde nicht geändert. Versuche es bitte erneut oder kontaktiere den Systemadministrator.",
 	"editaccount-error-pass": "Das Passwort des Benutzerkontos wurde nicht geändert. Versuche es bitte erneut oder kontaktiere den Systemadministrator.",
+	"editaccount-error-pass-policy": "Das Passwort wurde nicht geändert: $1",
 	"editaccount-error-realname": "Der bürgerliche Name des Benutzerkontos wurde nicht geändert. Versuche es bitte erneut oder kontaktiere den Systemadministrator.",
 	"editaccount-error-close": "Beim Schließen des Benutzerkontos trat ein Problem auf. Versuche es bitte erneut oder kontaktiere den Systemadministrator.",
 	"editaccount-invalid-email": "„$1“ ist keine gültige E-Mail-Adresse!",

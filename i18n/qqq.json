@@ -51,6 +51,7 @@
 	"editaccount-success-close": "A status message",
 	"editaccount-error-email": "An error message",
 	"editaccount-error-pass": "An error message",
+	"editaccount-error-pass-policy": "Error message shown when the new password does not meet the configured password policy. Parameters:\n* $1 is the policy error description from MediaWiki.",
 	"editaccount-error-realname": "An error message",
 	"editaccount-error-close": "An error message",
 	"editaccount-invalid-email": "An error message",

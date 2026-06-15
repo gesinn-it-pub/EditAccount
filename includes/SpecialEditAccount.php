@@ -224,13 +224,16 @@ class SpecialEditAccount extends SpecialPage {
 				break;
 			case 'setpass':
 				$newPass = $request->getVal( 'wpNewPass' );
-				$isPassSet = $userToEdit->setPassword( $newPass, $mUser, $this->passwordFactory, $loggedUser, $changeReason );
-				if ( $isPassSet ) {
+				$passStatus = $userToEdit->setPassword( $newPass, $mUser, $this->passwordFactory, $loggedUser, $changeReason );
+				if ( $passStatus->isGood() ) {
 					$this->mStatusMsg = $this->msg( 'editaccount-success-pass', $mUser->mName )->text();
 					$this->mStatus = $this->mStatusMsg;
-				} else {
+				} elseif ( $passStatus->hasMessage( 'editaccount-error-pass' ) ) {
 					$this->mStatusMsg = $this->msg( 'editaccount-error-pass', $mUser->mName )->text();
-					$this->mStatus = $this->mStatusMsg;
+					$this->mStatus = false;
+				} else {
+					$this->mStatusMsg = $this->msg( 'editaccount-error-pass-policy', $passStatus->getMessage()->text() )->text();
+					$this->mStatus = false;
 				}
 				$template = 'DisplayUser';
 				break;
