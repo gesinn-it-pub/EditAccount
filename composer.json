@@ -1,6 +1,6 @@
 {
 	"name": "gesinn-it-pub/edit-account",
-  	"type": "mediawiki-extension",
+	"type": "mediawiki-extension",
 	"require-dev": {
 		"mediawiki/mediawiki-codesniffer": "43.0.0",
 		"mediawiki/mediawiki-phan-config": "0.14.0",
