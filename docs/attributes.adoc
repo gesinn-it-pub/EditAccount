@@ -1,0 +1,3 @@
+:project_name: EditAccount
+:project_type: mediawiki
+:phan:

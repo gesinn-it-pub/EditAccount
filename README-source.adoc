@@ -1,0 +1,6 @@
+include::docs/attributes.adoc[]
+= {project_name}
+
+image:https://github.com/gesinn-it-pub/EditAccount/actions/workflows/ci.yml/badge.svg[CI,link=https://github.com/gesinn-it-pub/EditAccount/actions/workflows/ci.yml]
+
+TODO: Add project description.
