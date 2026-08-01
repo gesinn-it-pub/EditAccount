@@ -95,12 +95,15 @@ jobs:
       - name: Build skills
         run: |
           PROJECT_TYPE=$(grep ':project_type:' docs/attributes.adoc | sed 's/.*: *//')
+          ATTR_ARGS=()
+          grep -q ':phan:' docs/attributes.adoc && ATTR_ARGS+=(--attribute phan)
           python3 docs/gesinn-it-docs-master-pub/scripts/build-skills.py \
             --manifests-dir docs/gesinn-it-docs-master-pub/skills/manifests \
             --snippets-dir  docs/gesinn-it-docs-master-pub/snippets \
             --claude-skills-dir .claude/skills \
             --agents-skills-dir .agents/skills \
-            --scope "$PROJECT_TYPE"
+            --scope "$PROJECT_TYPE" \
+            "${ATTR_ARGS[@]}"
 
       # --- Single commit ---
 
