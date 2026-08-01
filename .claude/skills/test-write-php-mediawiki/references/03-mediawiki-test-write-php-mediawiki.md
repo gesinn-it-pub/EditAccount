@@ -193,6 +193,84 @@ public function testMyFunc( string $wikitext, string $expected ): void {
 Annotate the class with `@group Database` — the parser service requires
 the database to be initialised even when no pages are written.
 
+**Testing Action classes**
+
+Action tests (subclasses of `Action`) always extend
+`MediaWikiIntegrationTestCase` and carry `@group Database` — even when
+no pages are written — because `Action::__construct()` requires a real
+`Article` which resolves through the service container.
+
+Construct the action under test through a private factory method, not
+inline in `setUp()`:
+
+``` php
+private function newAction( Title $title, array $requestParams = [] ): MyAction {
+    $context = new DerivativeContext( RequestContext::getMain() );
+    $context->setTitle( $title );
+    $context->setRequest( new FauxRequest( $requestParams ) );
+    $article = Article::newFromTitle( $title, $context );
+    return new MyAction( $article, $context );
+}
+```
+
+Use `FauxRequest` for GET and POST simulation; pass params as the first
+argument and set `true` as the second argument for POST:
+
+``` php
+new FauxRequest( [ 'action' => 'myaction' ] )         // GET
+new FauxRequest( [ 'token' => '...', 'from' => '...' ], true )  // POST
+```
+
+When the action under test calls
+`MediaWikiServices::getInstance()→getPermissionManager()` (a service
+lookup, not constructor-injected), override it with
+`$this→setService()`:
+
+``` php
+$permManager = $this->createMock( PermissionManager::class );
+$permManager->method( 'userCan' )->with( 'edit', $user, $title )->willReturn( false );
+$this->setService( 'PermissionManager', $permManager );
+```
+
+For static methods that accept an `IContextSource`, mock the context
+directly rather than building a full `DerivativeContext`:
+
+``` php
+$context = $this->createMock( IContextSource::class );
+$context->method( 'getTitle' )->willReturn( $title );
+$context->method( 'getUser' )->willReturn( $user );
+$context->method( 'getRequest' )->willReturn( new FauxRequest( $params ) );
+```
+
+Override config globals set via `global $wgFoo` with
+`$this→setMwGlobals()` in `setUp()`. Reset to the default before each
+test so branches under test are explicit:
+
+``` php
+protected function setUp(): void {
+    parent::setUp();
+    $this->setMwGlobals( 'wgMyExtensionFlag', false );
+}
+
+public function testBranchEnabled(): void {
+    $this->setMwGlobals( 'wgMyExtensionFlag', true );
+    // ...
+}
+```
+
+Use `overrideConfigValues()` instead when the extension reads config
+through the MW config system (registered in `extension.json` under
+`config` and accessed via
+`$this→getServiceContainer()→getMainConfig()→get()`). `setMwGlobals()`
+and `overrideConfigValues()` are not interchangeable — use whichever
+matches how the production code reads the value.
+
+Assert on tab order by comparing `array_keys()`:
+
+``` php
+$this->assertSame( [ 'view', 'formedit', 'edit', 'history' ], array_keys( $links['views'] ) );
+```
+
 **Test fixtures**
 
 - Use `setUp()` and `tearDown()` for test-scoped fixtures
@@ -202,6 +280,94 @@ the database to be initialised even when no pages are written.
 
 - Use `getMockBuilder()` / `createMock()` for dependencies; prefer
   constructor injection so mocks can be passed in
+
+**Chaining teardown steps safely**
+
+When `tearDown()` performs more than one cleanup action (delete fixture
+pages, roll back an open transaction, call `parent::tearDown()`), a
+single unguarded step that throws can abort every later step — including
+the one that matters most for the **next** test (transaction rollback,
+parent cleanup). Nest each step in its own `try/finally` so a failure in
+one never skips the rest:
+
+``` php
+protected function tearDown(): void {
+    try {
+        $this->pageDeleter->deleteCreatedPages();
+    } finally {
+        try {
+            $this->rollbackOpenTransactions();
+        } finally {
+            parent::tearDown();
+        }
+    }
+}
+```
+
+Never silently swallow an exception in cleanup code
+(`catch ( \Exception $e ) {}`). Catch `\Throwable`, log it, and continue
+— a silently swallowed cleanup failure hides the real cause of a later,
+unrelated-looking test failure in a different test class.
+
+**Removing dead mock/service-registration scaffolding**
+
+A test-scoped service-registration helper (registering a mock on a
+shared/global container for the duration of a test) becomes dead once
+the production code it targeted is fully constructor-injected — the
+system under test no longer reaches it through the container. Before
+deleting such a registration:
+
+1.  Delete one registration and re-run only that test class. Keep the
+    deletion only if the test stays green **at the same assertion
+    count** — a mock nothing calls can still report "green" for the
+    wrong reason (e.g. a never-verified `expects( $this→never() )`).
+
+2.  Re-run the full test suite, not just the one class. A registration
+    inside a `finally` block, or one that restores a mutated shared
+    value (config, settings) rather than injecting a collaborator, is
+    load-bearing state-restoration, not dead scaffolding — deleting it
+    can silently corrupt global state for every test class that runs
+    afterward in the same process, often dozens of unrelated failures
+    far from the file you edited.
+
+3.  If step 2 finds a regression, keep that specific registration and
+    document inline why it is still required (e.g. "restores shared
+    Settings state mutated by this test").
+
+**When a fix for a flaky/intermittent test doesn’t help**
+
+Do not trust code-review-level plausibility as proof that a fix for a
+flaky or intermittent failure (lock timeouts, race conditions,
+order-dependent state) actually works. After landing it, watch the
+failure rate empirically. If the failure becomes more frequent or does
+not improve, revert immediately rather than layering a second theory on
+top of an unproven first one — state the empirical evidence in the
+revert message ("X became more frequent, not less"), not just "didn’t
+work," so the next attempt has the diagnostic signal you gathered.
+
+**Diagnosing test breakage after a platform/dependency upgrade**
+
+When a test starts failing after upgrading the platform, framework, or a
+dependency, never just loosen the assertion to make it pass again —
+identify the exact mechanism that changed first, then pick the response
+that fits:
+
+- If the upgrade changed **which code path** produces a value (e.g. a
+  cached path now returns before a fresh computation would run), make
+  the assertion branch explicitly on the version/condition, with a
+  comment naming the mechanism — this documents the behavior change
+  instead of hiding it.
+
+- If the upgrade changed **incidental output structure** but the
+  property under test is unchanged (e.g. generated markup shape changes
+  but the semantic identity does not), assert on the stable semantic
+  anchor instead of the structure — this makes the test resilient to the
+  next incidental change too, not just this one.
+
+- If the upgrade’s stricter/different behavior trips an **irrelevant**
+  code path that the test doesn’t actually exercise on purpose, disable
+  that irrelevant feature at the test-environment boundary rather than
+  restructuring the assertion or the test.
 
 **Running tests**
 

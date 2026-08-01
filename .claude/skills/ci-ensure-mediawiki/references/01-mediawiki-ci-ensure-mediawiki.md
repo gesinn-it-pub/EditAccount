@@ -145,10 +145,31 @@ Required scripts in `composer.json`:
         "minus-x check ."
     ],
     "phpcs": "phpcs -sp",
-    "phpunit": "php -d memory_limit=512M ../../tests/phpunit/phpunit.php -c phpunit.xml.dist --testdox",
-    "phpunit-coverage": "php -d memory_limit=512M ../../tests/phpunit/phpunit.php -c phpunit.xml.dist --testdox --coverage-text --coverage-html coverage/php --coverage-clover coverage/php/coverage.xml"
+    "phpunit": [
+        "@putenv Composer\\Config::disableProcessTimeout",
+        "php -d memory_limit=512M ../../tests/phpunit/phpunit.php -c phpunit.xml.dist --testsuite extension-<extension-id>-unit --testdox",
+        "php -d memory_limit=512M ../../tests/phpunit/phpunit.php -c phpunit.xml.dist --testsuite extension-<extension-id>-integration --testdox"
+    ],
+    "phpunit-coverage": [
+        "@putenv Composer\\Config::disableProcessTimeout",
+        "php -d memory_limit=512M ../../tests/phpunit/phpunit.php -c phpunit.xml.dist --testsuite extension-<extension-id>-unit --testdox",
+        "php -d memory_limit=512M ../../tests/phpunit/phpunit.php -c phpunit.xml.dist --testsuite extension-<extension-id>-integration --testdox --coverage-text --coverage-html coverage/php --coverage-clover coverage/php/coverage.xml"
+    ]
 }
 ```
+
+<div class="note">
+
+Unit and integration suites must run as **separate PHP processes**.
+Running both suites in one process causes MW-internal caches (held in
+static variables that survive SMW store resets) to accumulate several
+gigabytes of RSS, which triggers the Linux OOM-killer (exit 137) before
+any test output appears. `disableProcessTimeout` prevents Composer’s
+default 300 s watchdog from killing long integration runs on slow CI
+runners. Replace `<extension-id>` with the lowercase extension
+identifier used in `phpunit.xml.dist` (e.g. `page-forms`).
+
+</div>
 
 <div class="note">
 
@@ -470,6 +491,90 @@ visible independently.
 ```
 
 Pass the same version variables used in the coverage step.
+
+### Make dependency extensions visible to Phan
+
+`mediawiki/mediawiki-phan-config` only adds MW core and MW vendor to
+`directory_list` by default — never `extensions/`. Any activated
+dependency extension detected in Step 8a (SMW, DisplayTitle, PageForms,
+…) is therefore invisible to Phan’s type-checker. Every call into that
+extension’s classes surfaces as `PhanUndeclaredClass`,
+`PhanUndeclaredClassMethod`, or `PhanUndeclaredTypeProperty` — pure
+noise that buries real bugs and cannot be fixed by suppressing
+individual findings.
+
+Read `.phan/config.php` and check whether each dependency extension
+activated in Step 8a (i.e. each extension from the Step 8a bundle table
+whose `_VERSION` variable is set in the Makefile) is present in both
+`directory_list` and `exclude_analysis_directory_list`. If not, add it
+using this pattern:
+
+``` php
+$IP = getenv( 'MW_INSTALL_PATH' ) !== false
+    ? str_replace( '\\', '/', getenv( 'MW_INSTALL_PATH' ) )
+    : '../..';
+
+$dependencyExtensions = [
+    // one line per activated dependency extension from Step 8a,
+    // e.g. 'SemanticMediaWiki', 'DisplayTitle', 'PageForms', ...
+];
+
+foreach ( $dependencyExtensions as $ext ) {
+    $cfg['directory_list'][] = $IP . '/extensions/' . $ext;
+    $cfg['exclude_analysis_directory_list'][] = $IP . '/extensions/' . $ext;
+}
+```
+
+Use `MW_INSTALL_PATH` (\$IP) rather than a hard-coded path — the
+extension’s location inside the container is only known at build time.
+Populate `$dependencyExtensions` from the same Step 8a table; that table
+already maps every DCI-bundled extension to its directory name under
+`extensions/` — do not duplicate that mapping here.
+
+**Both** lists must be populated together, never just one:
+
+- `directory_list` makes the dependency’s classes known to Phan, turning
+  `PhanUndeclaredClass`-style noise into real type checking against the
+  dependency’s actual API.
+
+- `exclude_analysis_directory_list` stops Phan from **reporting**
+  findings from inside the dependency’s own code. Omitting it imports
+  the dependency’s entire finding set as if it were this extension’s
+  code — observed as 480+ SMW-related findings alone when SRF was added
+  without the exclusion. Skipping this list silently regresses the
+  config back to the original noise problem, just relocated.
+
+This pattern is not SMW-specific — apply it to every activated
+dependency extension detected in Step 8a, for every DCI-integrated
+extension that has a `.phan/` config.
+
+Once real API mismatches are no longer buried in noise, Phan typically
+surfaces genuine findings that were previously invisible (e.g. a method
+call that no longer exists in the pinned dependency version, or an
+argument type that does not match the dependency’s actual signature).
+Fix those or baseline them deliberately — do not suppress them as if
+they were still cross-extension noise.
+
+### Regenerate the baseline after changing `.phan/config.php`
+
+Any change to `directory_list` or `exclude_analysis_directory_list`
+changes what Phan analyses, which invalidates the existing
+`.phan/baseline.php`. Regenerate it:
+
+1.  Run the baseline generator **inside the DCI container** — the
+    extension is copied into the image at build time, not bind-mounted,
+    so a baseline generated on the host will not match the paths Phan
+    sees in CI.
+
+2.  Copy the regenerated file back out with `docker cp` (the container
+    is not accessible via a bind mount).
+
+3.  Generate the baseline on **exactly** the MW/PHP/SMW (and other
+    dependency) version combination that `ci-coverage`/Phan actually
+    runs on in `ci.yml` — the baseline is matrix-row-specific. A
+    baseline generated against a different version combination will
+    cause CI to report spurious new findings (or miss real ones) the
+    next time it runs against the pinned matrix row.
 
 ## 8e: Ask only when ambiguous
 

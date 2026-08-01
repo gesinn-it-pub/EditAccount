@@ -66,3 +66,17 @@ LESS over plain CSS.
 - `float` / `text-align: left` hardcoded — use `/* @noflip */`
   annotation when needed, otherwise ResourceLoader’s CSSJanus handles
   RTL automatically
+
+**New DOM elements need a rule before the JS that inserts them ships**
+
+Any JS change that starts inserting a new element into the page (an
+`<img>`, a tooltip, a badge, a newly-reachable branch that used to be
+dead code) must ship together with a stylesheet rule for it — an
+untouched element inherits whatever the surrounding layout happens to
+do, which is rarely correct (an unconstrained `<img>` grows a row from
+85px to 231px and clips a sibling; an unstyled inline span runs on
+against the preceding text with no separator). Grep the stylesheet for
+the new element’s class before considering the JS change complete; if
+there is no rule, add one — a missing rule is not "no visible defect" in
+jsdom (see the Playwright execution reference for why), it is a defect
+that has not been looked at yet.

@@ -7,8 +7,9 @@ description: >
 Load the following reference files before starting work:
 
 - `references/01-universal-test-write.md`
-- `references/02-mediawiki-general.md`
-- `references/03-mediawiki-js.md`
-- `references/04-mediawiki-install-deps.md`
-- `references/05-mediawiki-run-tests-npm.md`
-- `references/06-mediawiki-debug-browser-playwright.md`
+- `references/02-mediawiki-test-write-js-mediawiki.md`
+- `references/03-mediawiki-general.md`
+- `references/04-mediawiki-js.md`
+- `references/05-mediawiki-install-deps.md`
+- `references/06-mediawiki-run-tests-npm.md`
+- `references/07-mediawiki-debug-browser-playwright.md`

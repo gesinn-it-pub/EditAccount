@@ -22,6 +22,37 @@ Use this approach when:
 For HTTP response analysis or HTML source inspection, `curl` from inside
 the container is sufficient and faster.
 
+**Mandatory before declaring a fix or new feature done, not just
+optional debugging**
+
+A green node-qunit/jsdom suite proves the code under test behaves as
+asserted — it does not prove the feature renders correctly on a live
+wiki. jsdom has no layout engine (every element reports zero
+width/height/position) and no stylesheet cascade, so it cannot catch:
+
+- A DOM-insertion callback (`eventRender`, a widget’s `_create()`, an
+  `afterEach` hook) that receives a **shared** element spanning more
+  than one logical item under real layout conditions, even though a
+  synthetic unit-test fixture handed it exactly one item — this is
+  precisely how a selector fix that is correct in isolation ends up
+  writing the wrong item’s content into every sibling once the fix makes
+  a previously-dead branch live.
+
+- Missing or wrong CSS for anything newly inserted into the DOM (no rule
+  at all reads as "no visible defect" in jsdom, but overflows,
+  truncates, or clips content in an actual browser).
+
+- Any layout-, timing-, or paint-dependent behavior (stacking/overlap
+  algorithms, scroll position, transitions).
+
+Before marking a JS fix or feature complete, run it once through this
+Playwright setup against a real wiki page exercising the changed code
+path, and visually/structurally confirm the actual rendered DOM and
+screenshot match intent — do not rely on unit-test green alone, and do
+not assert in a commit message, code comment, or release note that a
+real-browser reproduction "would be needed" without having tried this
+first.
+
 **Get the container name:**
 
 ``` console
