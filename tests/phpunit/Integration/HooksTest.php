@@ -12,36 +12,43 @@ use MediaWiki\Extension\EditAccount\SpecialEditAccount;
  */
 class HooksTest extends MediaWikiIntegrationTestCase {
 
-	public function testOnSpecialContributionsBeforeMainOutputDoesNothingForActiveUser(): void {
-		$user = $this->getMutableTestUser()->getUser();
-		$out = $this->createMock( OutputPage::class );
-		$out->expects( $this->never() )->method( 'wrapWikiMsg' );
-		$out->expects( $this->never() )->method( 'addHTML' );
-		$skin = $this->createMock( Skin::class );
+	private function runContributionsHook( User $user ): OutputPage {
+		$context = new \DerivativeContext( RequestContext::getMain() );
+		$out = new OutputPage( $context );
+		$context->setOutput( $out );
+		$context->setTitle( SpecialPage::getTitleFor( 'Contributions' ) );
+		$context->setLanguage( 'qqx' );
 
-		$result = Hooks::onSpecialContributionsBeforeMainOutput( $user->getId(), $user, $out, $skin );
+		$sp = $this->getServiceContainer()->getSpecialPageFactory()->getPage( 'Contributions' );
+		$sp->setContext( $context );
 
-		$this->assertTrue( $result );
+		$this->getServiceContainer()->getHookContainer()->run(
+			'SpecialContributionsBeforeMainOutput',
+			[ $user->getId(), $user, $sp ]
+		);
+
+		return $out;
 	}
 
-	public function testOnSpecialContributionsBeforeMainOutputAddsBoxForDisabledAccount(): void {
+	public function testSpecialContributionsHookDoesNothingForActiveUser(): void {
 		$user = $this->getMutableTestUser()->getUser();
 
-		// Mark the account disabled
+		$out = $this->runContributionsHook( $user );
+
+		$this->assertSame( '', $out->getHTML() );
+	}
+
+	public function testSpecialContributionsHookAddsBoxForDisabledAccount(): void {
+		$user = $this->getMutableTestUser()->getUser();
+
 		$userOptionsManager = $this->getServiceContainer()->getUserOptionsManager();
 		$userOptionsManager->setOption( $user, 'disabled', 1 );
 		$userOptionsManager->saveOptions( $user );
 
-		$out = $this->createMock( OutputPage::class );
-		$out->expects( $this->once() )
-			->method( 'wrapWikiMsg' )
-			->with( $this->stringContains( 'errorbox' ), 'edit-account-closed-flag' );
-		$out->expects( $this->once() )->method( 'addHTML' );
-		$skin = $this->createMock( Skin::class );
+		$out = $this->runContributionsHook( $user );
 
-		$result = Hooks::onSpecialContributionsBeforeMainOutput( $user->getId(), $user, $out, $skin );
-
-		$this->assertTrue( $result );
+		$this->assertStringContainsString( 'account-disabled-box', $out->getHTML() );
+		$this->assertStringContainsString( 'edit-account-closed-flag', $out->getHTML() );
 	}
 
 	public function testIsAccountDisabledReturnsFalseForActiveUser(): void {

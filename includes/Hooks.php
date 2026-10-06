@@ -4,8 +4,7 @@ namespace MediaWiki\Extension\EditAccount;
 
 use ALItem;
 use ALRow;
-use OutputPage;
-use Skin;
+use SpecialPage;
 use User;
 
 class Hooks {
@@ -29,19 +28,18 @@ class Hooks {
 	 *
 	 * @param int $id User ID being viewed
 	 * @param User $user User object being viewed
-	 * @param OutputPage $out
-	 * @param Skin $skin
+	 * @param SpecialPage $sp The Special:Contributions page
 	 * @return bool
 	 */
 	public static function onSpecialContributionsBeforeMainOutput(
-		int $id,
-		User $user,
-		OutputPage $out,
-		Skin $skin
+		$id,
+		$user,
+		$sp
 	): bool {
 		if ( !SpecialEditAccount::isAccountDisabled( $user ) ) {
 			return true;
 		}
+		$out = $sp->getOutput();
 		$out->wrapWikiMsg(
 			"<div class=\"errorbox account-disabled-box\" style=\"padding: 1em;\">\n$1\n</div>",
 			'edit-account-closed-flag'
