@@ -6,6 +6,9 @@ This project adheres to [Semantic Versioning](https://semver.org/) and
 
 ## [Unreleased]
 
+### Fixed
+- Fix `TypeError` on Special:Contributions caused by the `SpecialContributionsBeforeMainOutput` handler declaring a wrong signature [`0e28de1`](https://github.com/gesinn-it-pub/EditAccount/commit/0e28de1)
+
 ## [3.1.0] - 2026-06-15
 
 Adds password policy enforcement and user name autocomplete to the select-user form.
