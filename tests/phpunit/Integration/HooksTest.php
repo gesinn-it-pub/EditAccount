@@ -2,7 +2,6 @@
 
 declare( strict_types=1 );
 
-use MediaWiki\Extension\EditAccount\Hooks;
 use MediaWiki\Extension\EditAccount\SpecialEditAccount;
 
 /**
