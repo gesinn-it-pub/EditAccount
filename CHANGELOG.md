@@ -6,8 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org/) and
 
 ## [Unreleased]
 
+## [3.1.1] - 2026-10-06
+
+Fixes an error on Special:Contributions.
+
 ### Fixed
-- Fix `TypeError` on Special:Contributions caused by the `SpecialContributionsBeforeMainOutput` handler declaring a wrong signature [`0e28de1`](https://github.com/gesinn-it-pub/EditAccount/commit/0e28de1)
+- Fix error on Special:Contributions that made the page unusable in MediaWiki 1.39; the notice for disabled accounts is displayed again [`0e28de1`](https://github.com/gesinn-it-pub/EditAccount/commit/0e28de1)
 
 ## [3.1.0] - 2026-06-15
 
@@ -55,7 +59,8 @@ random token generation.
 - Update i18n messages to use sitename [`50cea4d`](https://github.com/gesinn-it-pub/EditAccount/commit/50cea4d)
 - Add README with Codecov badge, description, installation and usage [`3e7b510`](https://github.com/gesinn-it-pub/EditAccount/commit/3e7b510)
 
-[Unreleased]: https://github.com/gesinn-it-pub/EditAccount/compare/3.1.0...HEAD
+[Unreleased]: https://github.com/gesinn-it-pub/EditAccount/compare/3.1.1...HEAD
+[3.1.1]: https://github.com/gesinn-it-pub/EditAccount/compare/3.1.0...3.1.1
 [3.1.0]: https://github.com/gesinn-it-pub/EditAccount/compare/3.0.1...3.1.0
 [3.0.1]: https://github.com/gesinn-it-pub/EditAccount/compare/3.0.0...3.0.1
 [3.0.0]: https://github.com/gesinn-it-pub/EditAccount/releases/tag/3.0.0
