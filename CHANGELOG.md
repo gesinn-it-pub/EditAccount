@@ -6,8 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org/) and
 
 ## [Unreleased]
 
-### Security
-- Update development dependencies (grunt 1.6.3, js-yaml, brace-expansion, browserslist, baseline-browser-mapping) to resolve open Dependabot alerts [`27cf8a8`](https://github.com/gesinn-it-pub/EditAccount/commit/27cf8a8)
+## [3.1.2] - 2026-11-17
+
+Updates development dependencies to resolve security alerts; no changes to the extension itself.
+
+### Changed
+- Update development dependencies (grunt, js-yaml, brace-expansion, browserslist, baseline-browser-mapping) to resolve open security alerts [`27cf8a8`](https://github.com/gesinn-it-pub/EditAccount/commit/27cf8a8)
 
 ## [3.1.1] - 2026-10-06
 
@@ -62,7 +66,8 @@ random token generation.
 - Update i18n messages to use sitename [`50cea4d`](https://github.com/gesinn-it-pub/EditAccount/commit/50cea4d)
 - Add README with Codecov badge, description, installation and usage [`3e7b510`](https://github.com/gesinn-it-pub/EditAccount/commit/3e7b510)
 
-[Unreleased]: https://github.com/gesinn-it-pub/EditAccount/compare/3.1.1...HEAD
+[Unreleased]: https://github.com/gesinn-it-pub/EditAccount/compare/3.1.2...HEAD
+[3.1.2]: https://github.com/gesinn-it-pub/EditAccount/compare/3.1.1...3.1.2
 [3.1.1]: https://github.com/gesinn-it-pub/EditAccount/compare/3.1.0...3.1.1
 [3.1.0]: https://github.com/gesinn-it-pub/EditAccount/compare/3.0.1...3.1.0
 [3.0.1]: https://github.com/gesinn-it-pub/EditAccount/compare/3.0.0...3.0.1
