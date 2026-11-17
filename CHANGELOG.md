@@ -6,6 +6,9 @@ This project adheres to [Semantic Versioning](https://semver.org/) and
 
 ## [Unreleased]
 
+### Security
+- Update development dependencies (grunt 1.6.3, js-yaml, brace-expansion, browserslist, baseline-browser-mapping) to resolve open Dependabot alerts [`27cf8a8`](https://github.com/gesinn-it-pub/EditAccount/commit/27cf8a8)
+
 ## [3.1.1] - 2026-10-06
 
 Fixes an error on Special:Contributions.
